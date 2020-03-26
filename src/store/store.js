@@ -3,20 +3,18 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 const store = new Vuex.Store({
     state:{
-        show:false,
-        myrank:'',//我的排名
+        playstatus:1,//顺序播放 2表示随机 3 表示单曲
+  
     },
     getters:{
         getmaplight(state){
-            return state.show
+            return state.playstatus
         }
     },
     mutations:{
-        changemaplight(state){
-           state.show = true
-        },
-        changemyrank(state,val){
-            state.myrank = val
+     
+        changePlayStatus(state,val){
+            state.playstatus = val
         }
     }
 })
