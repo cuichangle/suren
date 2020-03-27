@@ -8,7 +8,9 @@
              <div v-else>请先选择年份</div>
           </div>
           <div class="submit">
-              ￥120元
+            <span @click="paymoney">￥{{paynum}}元购买</span>
+           
+             
           </div>
         </div>
         <!-- 年份选择框 -->
@@ -23,18 +25,19 @@
         <div v-if="year>=0" :class="{'heiyear1':showselectyear}" class="month_warp">
            <div class="month_list" v-for="(item,index ) in list[year].month" :key="index" >
               <div class="list_left">{{item.month}}</div>
-              <div class="list_cen">点击浏览本月全部节目</div>
-              <div class="list_right">
+              <div @click="chonsemonth(index)" class="list_cen">点击浏览本月全部节目</div>
+              <div @click="selectbuy(index)" class="list_right">
                   <img v-if="item.flag" src="/static/img/chonse.png" alt="">
-                  <img v-else src="/static/img/chonse.png" alt="">
+                  <img v-else src="/static/img/nochonse.png" alt="">
               </div>
 
            </div>
        
       </div>
-      <div class="jiemu_warp">
-          <div class="jiemu_list" v-for="(item,index ) in songarr" :key="index" >
-            <div class="list_left jiemu_left">{{item.name}}</div>
+      <!-- 节目列表 -->
+      <div :class="{'dump':month>=0}"  class="jiemu_warp" >
+          <div @click="chonseaudio(index)" class="jiemu_list" v-for="(item,index ) in songarr" :key="index" >
+            <div class="list_left jiemu_left" :class="{'nowplay':cur==index}">{{item.name}}</div>
             <div class="jiemu_title">{{item.title}}</div>
            </div>
        </div>
@@ -55,14 +58,15 @@
 
 
 
-    <audio  :src="songarr[cur].src"  id="audio" @ended="overAudio" >
+
+    <!-- 音频操作 -->
+    <div v-if="showaudio" class="audiobox animated fadeInUp">
+          <audio  :src="songarr[cur].src"  id="audio" @ended="overAudio" >
       <!-- <source
      
         type="audio/mp3"
       /> -->
     </audio>
-    <!-- 重要内容区 -->
-    <div class="audiobox">
        <div class="audio_top">
           <img @click="clickme" src="/static/img/song.png" class="top_icon1" alt="">
           <img  @click="clickme" src="/static/img/tianjia.png" class="top_icon2" alt="">
@@ -99,16 +103,18 @@ export default {
   data() {
     return {
       audio: "",
-      audioWidth: -2,
+      audioWidth: -2,//圆圈左边的距离
       alltime: "",
-      intsecond: "",
+      intsecond: "",//总时长音频秒
       befort: 15, //快进快退的时间
       aftert: 30,
       playstatus: 1, //1表示顺序播放 2随机 3单曲
-      jishi: 0,
-      cur: 0,
+      jishi: 0,//播放时间
+      cur: -1,//音频索引
+
       audioPlayShow: true,
       audioInterval: null,
+      timerout:null,
       note: {
         backgroundImage:
           "url(" + require("../../static/img/jindutiao.png") + ") ",
@@ -118,9 +124,10 @@ export default {
 
       // 上面音乐有关
 
-      year: -1,
-      month: "",
-      showselectyear: false,
+      year: -1,//年份索引
+      month: -1,//月份索引
+      showaudio:false,//是否显示音频控件
+      showselectyear: false,//是否显示年份下拉框
 
       selectData: {
         backgroundImage: "url(" + require("../../static/img/xiala.png") + ") ",
@@ -264,6 +271,7 @@ export default {
   },
   computed: {
     playtime() {
+     //避免播放进度大于总时长
       let temp = "";
       if (this.jishi < this.intsecond) {
         temp = this.jishi;
@@ -274,6 +282,20 @@ export default {
       let s = temp % 60 < 10 ? "0" + temp % 60 : temp % 60;
 
       return min + ":" + s;
+    },
+
+    // 计算价钱
+    paynum(){
+      var num = 0
+      if(this.year>=0){
+        this.list[this.year].month.map((v)=>{
+          if(v.flag){
+            num+=30
+          }
+        })
+       
+      }
+       return num
     }
   },
 
@@ -285,11 +307,44 @@ export default {
     // 点击具体年份
     changeyear(i) {
       this.year = i;
-      console.log(i);
 
       this.showselectyear = false;
     },
+    // 点击月份
+    chonsemonth(i){
+      this.month = i
+    },
+    // 手动切换音频
+chonseaudio(i){
+ if(this.cur == i){
+   return
+ }
+ clearTimeout(this.timerout)
+ this.cur = i
+ this.showaudio = true
+ if(this.audio){
+ this.pauseAudio()
+ this.jishi = 0
+ this.audioWidth = -2
+ 
+ }
+  this.timerout =  setTimeout(() => {
+    this.playAudio()
+ }, 700);
+ 
+},
+// 微信支付
+paymoney(){
+  if(this.paynum == 0){
+    this.$toast('请选择年份')
+    return
+  }
 
+},
+// 切换购买按钮
+selectbuy(i){
+  this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag
+},
     /**
      * 切换播放状态
      *
@@ -467,13 +522,15 @@ export default {
   opacity: 0.1;
 }
 .s_list {
+  
   font-size: 12px;
   color: #333;
-
+  align-items: center;
   margin: 14px;
   display: flex;
 }
 .s_square {
+  vertical-align: middle;
   margin-right: 30px;
   width: 16px;
   border: 1px solid #ccc;
@@ -527,8 +584,16 @@ export default {
 .jiemu_warp{
   margin-top: 15px;
 
-  height: 33vh;
+  height: 0;
+  opacity: 0;
+  transition: all 0.4s ease-in-out;
+
   overflow-y: auto;
+}
+.dump{
+  height: 33vh;
+  opacity: 1;
+  transition: all 0.4s ease-in-out;
 }
 
 .jiemu_list{
@@ -548,7 +613,11 @@ export default {
 }
 
 
-
+.nowplay{
+  color: #666;
+  font-size: 14px;
+  font-weight: 700;
+}
 
 
 

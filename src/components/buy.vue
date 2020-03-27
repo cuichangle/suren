@@ -7,37 +7,58 @@
              <div v-if="year>-1">已选{{list[year].year}}年</div> 
              <div v-else>请先选择年份</div>
           </div>
-          <div class="submit">
-              ￥120元
+          <div @click="clickselectMonth" :style="selectData" class="select">
+             <div v-if="month>-1">已选{{list[year].year}}年</div> 
+             <div v-else>请先选择月份</div>
           </div>
         </div>
         <!-- 年份选择框 -->
-        <div  class="xiala" :class="{'heiyear':showselectyear}">
-            <div @click="changeyear(index)" class="s_list" v-for="(item,index) in list" :key="index">
+        <div  class="xiala" :class="{'heiyear':showselectyear||showselectmonth }"  >
+          <div class="select scrollyear" :class="{'heiyear':showselectyear }">
+             <div  @click="changeyear(index)" class="s_list" v-for="(item,index) in list" :key="index">
                 <div class="s_square"> <span class="s_dark" v-if="year == index"></span> </div>
                 <div class="s_title">{{item.year}}</div>
-            </div>
+             </div>
+          </div>
+          <div class="select scrollyear" :class="{'heiyear_month':showselectmonth }">
+              
+  <div @click="chonsemonth(index)" class="s_list" v-for="(item,index) in list[0].month" :key="index">
+                   <div class="s_square"> <span class="s_dark" v-if="month == index"></span> </div>
+                   <div class="s_title">{{item.month}}</div>
+              </div>
+              
+           </div>
+             
         </div>
 
-        <!-- 显示对应月份 -->
-        <div v-if="year>=0" :class="{'heiyear1':showselectyear}" class="month_warp">
-           <div class="month_list" v-for="(item,index ) in list[year].month" :key="index" >
-              <div class="list_left">{{item.month}}</div>
-              <div class="list_cen">点击浏览本月全部节目</div>
-              <div class="list_right">
-                  <img v-if="item.flag" src="/static/img/chonse.png" alt="">
-                  <img v-else src="/static/img/chonse.png" alt="">
-              </div>
 
-           </div>
-       
-      </div>
-      <div class="jiemu_warp">
-          <div class="jiemu_list" v-for="(item,index ) in songarr" :key="index" >
-            <div class="list_left jiemu_left">{{item.name}}</div>
+      <!-- 节目列表 -->
+      <div :class="{'dump':month>=0,'heiyear1':showselectyear||showselectmonth}"  class="jiemu_warp" >
+          <div @click="chonseaudio(index)" class="jiemu_list" v-for="(item,index ) in songarr" :key="index" >
+            <div class=" jiemu_left" :class="{'nowplay':cur==index}">{{item.name}}</div>
             <div class="jiemu_title">{{item.title}}</div>
            </div>
        </div>
+               <!-- 查看评论 -->
+        <div v-if="cur>=0"  class="month_warp animated fadeIn">
+           <div class="month_list" v-for="(item,index ) in list[year].month" :key="index" >
+                <div class="com_top">
+                    <img src="static/img/song.png" class="avatar" alt="">
+                    <div class="nickname">{{item.month}}</div>
+                    <div class="creattime">{{item.month}}</div>
+                    <van-icon  @click="changeLike(index)" class="like_icon" :class="{'islike':item.flag}"  size="20" name="good-job-o" />
+                </div>
+                <div class="com_content">
+                     
+                                用周迅的话说：的您是否烦恼都送搜电话呢你公司发发吧
+和不凡发哦哦好烦叫皮肤就阿訇阿飞好好房号
+                            
+                </div>
+              
+             
+            
+           </div>
+         </div>
       
     </div> 
 
@@ -55,14 +76,15 @@
 
 
 
-    <audio  :src="songarr[cur].src"  id="audio" @ended="overAudio" >
+
+    <!-- 音频操作 -->
+    <div v-if="showaudio" class="audiobox animated fadeInUp">
+          <audio  :src="songarr[cur].src"  id="audio" @ended="overAudio" >
       <!-- <source
      
         type="audio/mp3"
       /> -->
     </audio>
-    <!-- 重要内容区 -->
-    <div class="audiobox">
        <div class="audio_top">
           <img @click="clickme" src="/static/img/song.png" class="top_icon1" alt="">
           <img  @click="clickme" src="/static/img/tianjia.png" class="top_icon2" alt="">
@@ -99,16 +121,18 @@ export default {
   data() {
     return {
       audio: "",
-      audioWidth: -2,
+      audioWidth: -2, //圆圈左边的距离
       alltime: "",
-      intsecond: "",
+      intsecond: "", //总时长音频秒
       befort: 15, //快进快退的时间
       aftert: 30,
       playstatus: 1, //1表示顺序播放 2随机 3单曲
-      jishi: 0,
-      cur: 0,
+      jishi: 0, //播放时间
+      cur: -1, //音频索引
+
       audioPlayShow: true,
       audioInterval: null,
+      timerout: null,
       note: {
         backgroundImage:
           "url(" + require("../../static/img/jindutiao.png") + ") ",
@@ -118,10 +142,12 @@ export default {
 
       // 上面音乐有关
 
-      year: -1,
-      month: "",
-      showselectyear: false,
-
+      year: -1, //年份索引
+      month: -1, //月份索引
+      showaudio: false, //是否显示音频控件
+      showselectyear: false, //是否显示年份下拉框
+      showselectmonth: false,
+      
       selectData: {
         backgroundImage: "url(" + require("../../static/img/xiala.png") + ") ",
         backgroundRepeat: "no-repeat",
@@ -229,41 +255,41 @@ export default {
         {
           src:
             "http://isure.stream.qqmusic.qq.com/C400001xLIXo2w9V7U.m4a?guid=3745793350&vkey=256D0756B917CF335B9746AEA1DF582A2B603B3F34D2D5690CC54BE52423689DE9C65F34D22335EC7EB93D20275B4F9ACE69888350A90678&uin=8043&fromtag=66",
-          title: "世界这么大还是遇见你世界这么大还是遇见你世界这么大还是遇见你世界这么大还是遇见你世界这么大还是遇见你",
-          name:'素人现场'
+          title:
+            "世界这么大还是遇见你世界这么大还是遇见你世界这么大还是遇见你世界这么大还是遇见你世界这么大还是遇见你",
+          name: "素人现场"
         },
         {
           src:
             "http://isure.stream.qqmusic.qq.com/C400001Wp7M30PVoGt.m4a?guid=3745793350&vkey=FF439549BB96E63E96F06A24EB88E67FDBD5B5964700ED184D183E870A2676D607D12D0B6D3E9BB1D6603DDCA259F016F6851A805C16AE5B&uin=8043&fromtag=66",
 
           title: "也曾相识也曾相识也曾相识",
-          name:'素人读书'
-
+          name: "素人读书"
         },
         {
           src:
             "http://isure.stream.qqmusic.qq.com/C400003xmjo12aDRhw.m4a?guid=3745793350&vkey=C93839530ADE69DC47D78FB8A71120A0D7B95F4A3EFF7F8F8BA71728CA11799DB11EBF89711D1D909C0527200F2DF9FB95FD72022B7766B5&uin=8043&fromtag=66",
           title: "钟无艳钟无艳钟无艳钟无艳",
-          name:'素人晚安'
-
+          name: "素人晚安"
         },
         {
           src:
             "http://isure.stream.qqmusic.qq.com/C400003W9JiK14LJU5.m4a?guid=3745793350&vkey=D719F9075334E60FE03ACFBDBCAE658BA4940BC14E93D1AC0B167CBF7EE18DBF304AE5ECFAF17D11811AA12F435C577648E679995BDACC21&uin=8043&fromtag=66",
           title: "也曾相识，左邻右里",
-          name:'素人现场'
+          name: "素人现场"
         },
-          {
+        {
           src:
             "http://isure.stream.qqmusic.qq.com/C400001xLIXo2w9V7U.m4a?guid=3745793350&vkey=256D0756B917CF335B9746AEA1DF582A2B603B3F34D2D5690CC54BE52423689DE9C65F34D22335EC7EB93D20275B4F9ACE69888350A90678&uin=8043&fromtag=66",
           title: "世界这么大还是遇见你",
-          name:'素人晚安'
-        },
+          name: "素人晚安"
+        }
       ]
     };
   },
   computed: {
     playtime() {
+      //避免播放进度大于总时长
       let temp = "";
       if (this.jishi < this.intsecond) {
         temp = this.jishi;
@@ -282,14 +308,51 @@ export default {
     clickselect() {
       this.showselectyear = !this.showselectyear;
     },
+    // 点击月份下拉框
+    clickselectMonth() {
+      if (this.year >= 0) {
+        this.showselectmonth = !this.showselectmonth;
+      } else {
+        this.$toast("请先选择年份");
+      }
+    },
     // 点击具体年份
     changeyear(i) {
       this.year = i;
-      console.log(i);
 
       this.showselectyear = false;
     },
+    // 点击月份
+    chonsemonth(i) {
+      this.month = i;
+      this.showselectmonth = false;
+    },
+    //是否点赞
+    changeLike(i){
+this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag
+    },
+    // 手动切换音频
+    chonseaudio(i) {
+      if (this.cur == i) {
+        return;
+      }
+      clearTimeout(this.timerout);
+      this.cur = i;
+      this.showaudio = true;
+      if (this.audio) {
+        this.pauseAudio();
+        this.jishi = 0;
+        this.audioWidth = -2;
+      }
+      this.timerout = setTimeout(() => {
+        this.playAudio();
+      }, 700);
+    },
 
+    // 切换购买按钮
+    selectbuy(i) {
+      this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag;
+    },
     /**
      * 切换播放状态
      *
@@ -422,21 +485,13 @@ export default {
 }
 .main {
   position: relative;
-  padding: 13px 18px;
+  padding: 13px 20px 0px;
 }
 .main .m_top {
   display: flex;
   justify-content: space-around;
 }
-.main .submit {
-  width: 115px;
-  height: 31px;
-  line-height: 31px;
-  text-align: center;
-  color: #fff;
-  background: #666;
-  font-size: 12px;
-}
+
 .select {
   width: 106px;
   height: 31px;
@@ -447,34 +502,24 @@ export default {
 }
 .xiala {
   transition: all 0.5s ease-in-out;
-  left: 12vw;
-  width: 110px;
-  /* opacity: 0; */
+  width: 90vw;
   height: 0;
-  overflow-y: auto;
+  display: flex;
+  box-sizing: border-box;
+  justify-content: space-around;
   position: absolute;
 }
-.heiyear {
-  /* background: rgba(0,0,0,.2); */
-  height: 160px;
-  z-index: 10;
-  opacity: 1;
-  transition: all 0.8s ease-in-out;
-}
-.heiyear1{
-  transition: all 0.3s ease-in-out;
 
-  opacity: 0.1;
-}
+
 .s_list {
   font-size: 12px;
   color: #333;
-
-  margin: 14px;
+  align-items: center;
+  padding: 4px 7px;
   display: flex;
 }
 .s_square {
-  margin-right: 30px;
+  margin-right: 26px;
   width: 16px;
   border: 1px solid #ccc;
   border-radius: 50%;
@@ -490,62 +535,130 @@ export default {
   height: 8px;
   background: #101010;
 }
-.month_warp {
+
+
+.jiemu_warp {
+  margin-top: 15px;
+
+  height: 0;
+  opacity: 0;
+  transition: all 0.4s ease-in-out;
+
+  overflow-y: auto;
+}
+.dump {
+  height: 33vh;
+  opacity: 1;
+  transition: all 0.4s ease-in-out;
+}
+.heiyear1 {
   transition: all 0.3s ease-in-out;
 
-  margin-top: 15px;
-  height: 34vh;
-  overflow-y: auto;
+  opacity: 0.1;
 }
-.month_list{
-  margin-top: 22px;
-  display: flex;
-  justify-content: space-between;
+.jiemu_list {
   align-items: center;
-}
-.list_left{
-  width: 65px;
-  font-size: 12px;
-  color: #333;
-}
-.list_cen{
-  font-size: 8px;
-  color: #999;
-  flex: 1;
-
-}
-.list_right{
-  width: 30px;
-  height: 30px;
-  text-align: center;
-  line-height: 30px;
-}
-.list_right img{
-  width: 13px;
-  height: 13px;
-}
-.jiemu_warp{
-  margin-top: 15px;
-
-  height: 33vh;
-  overflow-y: auto;
-}
-
-.jiemu_list{
-  margin-top: 22px;
+  margin-top: 26px;
   white-space: nowrap;
   display: flex;
 }
-.jiemu_left{
-  border-right: 1px solid  #333;
+.jiemu_left {
+  color: #333;
+  width: 68px;
+  font-size: 12px;
+  border-right: 1px solid #333;
 }
-.jiemu_title{
+.jiemu_title {
   margin-left: 10px;
   font-size: 12px;
   color: #666;
   flex: 1;
   overflow-x: auto;
 }
+
+.nowplay {
+  color: #666;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.scrollyear {
+  height: 0;
+  opacity: 0.4;
+  transition: all 0.4s ease-in-out;
+
+  overflow-y: auto;
+}
+.heiyear {
+  height: 160px;
+  z-index: 10;
+  opacity: 1;
+  transition: all 0.6s ease-in-out;
+}
+.heiyear_month {
+  height: 160px;
+  z-index: 10;
+  opacity: 1;
+  transition: all 0.6s ease-in-out;
+}
+/* 评论相关 */
+.month_warp {
+  transition: all 0.3s ease-in-out;
+
+  margin-top: 8px;
+  height: 37.4vh;
+  overflow-y: auto;
+}
+.month_list {
+  margin-top: 18px;
+
+}
+
+.com_top{
+   align-items: center;
+  display: flex;
+  justify-content: space-between;
+
+}
+.like_icon{
+  color: #959595;
+  opacity: .6;
+  margin-left: auto;
+}
+.islike{
+  opacity: .7;
+  color: #000;
+  font-weight: 600;
+}
+.avatar{
+  width: 23px;
+  height: 23px;
+  border-radius: 23px;
+  margin-right: 9px;
+}
+.nickname{
+  color: #333333;
+  white-space: nowrap;
+  font-size: 9px;
+  max-width: 180px;
+  overflow-x: auto;
+  overflow: hidden;
+  margin-right: 9px;
+}
+.creattime{
+ font-size: 8px;
+ color: rgb(107, 107, 107);
+}
+.com_content{
+  padding: 6px 0 6px 32px;
+  font-size: 12px;
+  color: #333;
+}
+
+
+
+
+
 
 
 
