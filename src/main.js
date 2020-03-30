@@ -12,12 +12,14 @@ import request from './public/api'
 
 
 import store from './store/store'
-import {Icon,Button,Dialog ,Toast,Swipe, ActionSheet,SwipeItem,Loading,Switch} from 'vant'
+import {Icon,Slider,Button,Dialog ,Toast,Swipe, ActionSheet,SwipeItem,Loading,Switch} from 'vant'
 Vue.use(SwipeItem)
 Vue.use(Icon)
 Vue.use(Loading)
 Vue.use(Switch)
 Vue.use(ActionSheet)
+Vue.use(Slider)
+
 
 
 

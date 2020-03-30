@@ -1,17 +1,17 @@
 <template>
   <div :style="note" class="page">
     <div class="content">
-       <div class="title">中国最认真的同志广播</div>
+       <div class="title">{{indexTop.radioTitle}}</div>
        <div class="cost">
-         每月仅需30元
+         {{indexTop.priceInfo}}
        </div>
        <div class="explain">
-         按月购买, 包含多个栏目，每月共更新约18期节目
+         {{indexTop.shopTypeInfo}}
        </div>
        
 
        <div class="list_warp">
-         <div class="list_view" v-for="(item,index) in list" :key="index">
+         <div class="list_view" v-for="(item,index) in indexTop.programaInfo" :key="index">
            {{item}}
          </div>
        </div>
@@ -27,7 +27,7 @@
      </div>
      <div class="footer">
 
-      <div class="count">12</div>
+      <div class="count">{{userShopInfo.noShopMonthNum}}</div>
 
      </div>
   
@@ -39,14 +39,9 @@
 export default {
   data() {
     return {
-      list: [
-        "素人日记",
-        "素人日记",
-        "素人日记",
-        "素人日记",
-        "素人日记",
-        "素人日记"
-      ],
+      indexTop:{},
+      userShopInfo:{},
+
       note: {
         backgroundImage: "url(" + require("../../static/img/home2.png") + ") ",
         backgroundRepeat: "no-repeat",
@@ -55,6 +50,15 @@ export default {
     };
   },
   methods: {
+    // 获得后端返回的路径地址，取oppenid
+    getUrlParam(key){
+       var reg = new RegExp("(^|&)" + key + "=([^&]*)(&|$)", "i");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+            return unescape(r[2]);
+        }
+        return null;
+    },
     gobuy(){
       this.$router.push({path:'/buy'})
     },
@@ -69,13 +73,39 @@ export default {
       this.$router.push({path:'/tingzhong'})
 
     },
+    // 获得首页信息
+    getHomeInfo(){
+      this.$toast.loading({
+  message: '努力加载中...',
+  forbidClick: true,
+  duration:500
+});
+      let openid = this.$store.state.openid
+      this.$request('index/info',{openid:openid}).then(res=>{
+        this.indexTop = res.response.indexTop
+        this.userShopInfo = res.response.userShopInfo
+
+
+      })
+    }
     
-  }
+  },
+  mounted() {
+    let id = this.getUrlParam('openid')||'oUWMrwX2009ZBdhqlKi-rD0OeMSI'
+    if(id){
+        this.$store.commit('changeOpenid',id)
+    }else{
+      // window.location.href = 'http://surenguangbo.com/suren';
+    }
+    this.getHomeInfo()
+ 
+
+  },
 };
 </script>
 <style scoped>
 .content {
-  padding-top: 126px;
+  padding: 126px 14px 0 ;
   text-align: center;
   color: #fff;
 }
@@ -106,8 +136,8 @@ export default {
 
 .footer {
   position: fixed;
-  bottom: 7vh;
-  left: 40vw;
+  bottom: 8vh;
+  left: 39vw;
   width: 20px;
   text-align: center;
   line-height: 20px;

@@ -93,9 +93,22 @@
        </div>
        <div class="audio_center">
          <div class="cen_nowtime">{{playtime}}</div>
-         <div ref='line' :style="note" class="cen_jindu">
-            <img :style="{left: audioWidth + 'px'}" class="cen_icon" src="static/img/songsquare.png" alt="">
-         </div>
+                 <van-slider
+         class="test_box"
+  v-model="value"
+   @input="changevalue"
+   @change="playaudioagain"
+  :style="note"
+  bar-height=2
+ 
+  active-color="none"
+>
+<template #button>
+    <div class="custom-button cen_jindu">
+      <img class="cen_icon" src="static/img/songsquare.png" alt="">
+    </div>
+  </template>
+  </van-slider>
          <div class="cen_alltime">{{alltime}}</div>
        </div>
        <div class="audio_bottom">
@@ -117,6 +130,8 @@
   </div>
 </template>
 <script>
+import { Slider } from "vant";
+
 export default {
   data() {
     return {
@@ -147,7 +162,7 @@ export default {
       showaudio: false, //是否显示音频控件
       showselectyear: false, //是否显示年份下拉框
       showselectmonth: false,
-      
+      value:0,
       selectData: {
         backgroundImage: "url(" + require("../../static/img/xiala.png") + ") ",
         backgroundRepeat: "no-repeat",
@@ -331,6 +346,16 @@ export default {
     changeLike(i){
 this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag
     },
+        // 播放进度
+    changevalue(v) {
+      this.pauseAudio();
+      this.jishi = parseInt(this.intsecond / 100 * v);
+    },
+    // 拖动结束
+    playaudioagain() {
+      this.audio.currentTime = this.jishi;
+      this.playAudio();
+    },
     // 手动切换音频
     chonseaudio(i) {
       if (this.cur == i) {
@@ -378,17 +403,15 @@ this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag
     playAudio() {
       this.audioPlayShow = false;
       this.audio = document.getElementById("audio");
-      let lineW = this.$refs.line.offsetWidth - 7;
       let intsecond = parseInt(this.audio.duration);
       this.intsecond = intsecond;
       let min = parseInt(intsecond / 60);
       let second = intsecond % 60 < 10 ? "0" + intsecond % 60 : intsecond % 60;
       this.alltime = min + ":" + second;
-
-      let step = (lineW / this.audio.duration).toFixed(2);
+      let step = Number(100 / intsecond).toFixed(3);
       this.audioInterval = setInterval(() => {
         this.jishi++;
-        this.audioWidth = this.audioWidth + Number(step);
+        this.value = this.value + Number(step);
       }, 1000);
       audio.play();
     },
@@ -439,21 +462,19 @@ this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag
       }, 600);
       console.log("当前播放", this.cur);
     },
-    // 快退
+     // 快退
     clickBefore() {
-      let lineW = this.$refs.line.offsetWidth - 7;
       if (!this.audio) {
         return;
       }
-      let step = (lineW / this.audio.duration).toFixed(2);
+      let nowvalue = (100 / this.intsecond).toFixed(3);
       if (this.jishi > this.befort) {
         this.jishi = this.jishi - this.befort;
-        this.audio.currentTime = this.jishi;
-        this.audioWidth = this.audioWidth - this.befort * step;
+        this.value = this.value - this.befort * Number(nowvalue);
       } else {
         this.jishi = 0;
         this.audio.currentTime = this.jishi;
-        this.audioWidth = -1;
+        this.value = 0;
       }
     },
     // 快进
@@ -461,16 +482,15 @@ this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag
       if (!this.audio) {
         return;
       }
-      let lineW = this.$refs.line.offsetWidth - 7;
-      let step = (lineW / this.audio.duration).toFixed(2);
+      let nowvalue = (100 / this.intsecond).toFixed(3);
       if (this.jishi + this.aftert < this.intsecond) {
         this.jishi = this.jishi + this.aftert;
         this.audio.currentTime = this.jishi;
-        this.audioWidth = this.audioWidth + this.aftert * step;
+        this.value = this.value + Number(this.aftert * nowvalue);
       } else {
         this.jishi = this.jishi + 4;
         this.audio.currentTime = this.jishi;
-        this.audioWidth = this.audioWidth + 4 * step;
+        this.value = this.value + Number(4 * nowvalue);
       }
     },
     clickme() {
@@ -679,7 +699,6 @@ this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag
   box-sizing: border-box;
   position: fixed;
   bottom: 0;
-  background: #eee;
   padding-top: 13.5px;
 }
 /* top */
@@ -728,14 +747,10 @@ this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag
   color: #333;
 }
 .cen_jindu {
-  position: relative;
   flex: 1;
-  height: 2px;
-  background: red;
 }
 .cen_icon {
-  position: absolute;
-  top: -6px;
+
   width: 13px;
   height: 13px;
 }

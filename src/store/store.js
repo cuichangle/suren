@@ -3,18 +3,18 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 const store = new Vuex.Store({
     state:{
-        playstatus:1,//顺序播放 2表示随机 3 表示单曲
+        openid:'oUWMrwX2009ZBdhqlKi-rD0OeMSI',//顺序播放 2表示随机 3 表示单曲
   
     },
     getters:{
-        getmaplight(state){
-            return state.playstatus
+        getoptionid(state){
+            return state.openid
         }
     },
     mutations:{
      
-        changePlayStatus(state,val){
-            state.playstatus = val
+        changeOpenid(state,val){
+            state.openid = val
         }
     }
 })

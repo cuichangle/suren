@@ -1,10 +1,10 @@
 import axios from 'axios'
 
 
-let sendurl = 'http://woman.ichangban.com/api/'
+let sendurl = 'http://api.surenguangbo.com:8088/suren/' //测试地址
 
    const request=function (url,data,flag){
-        let userAccess = localStorage.getItem('zjflid') || ''
+        let userAccess = this.$store.state.openid || ''
         var promise = new Promise((resolve,reject)=>{
             axios.post(sendurl+url,data,{
                 headers: {
@@ -12,13 +12,11 @@ let sendurl = 'http://woman.ichangban.com/api/'
                     'content-type': 'application/json'
                   },
             }).then(res=>{
-
-            
-                    if(res.data.status == 1){
-                        resolve(res.data.data)
+                    if(res.data.code == 200){
+                        resolve(res.data)
                       }else{
                         
-                          this.$toast(res.data.msg)
+                          this.$toast(res.data.errorMessage)
                           if(res.data.status == 40101){
                             // this.$router.push({path:'/login'})
                           }
