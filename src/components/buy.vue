@@ -4,27 +4,28 @@
     <div class="main">
         <div class="m_top">
           <div @click="clickselect" :style="selectData" class="select">
-             <div v-if="year>-1">已选{{list[year].year}}年</div> 
+             <div v-if="yearName">已选{{yearName}}</div> 
              <div v-else>请先选择年份</div>
           </div>
           <div @click="clickselectMonth" :style="selectData" class="select">
-             <div v-if="month>-1">已选{{list[year].year}}年</div> 
+             <div v-if="monthName">已选{{monthName}}</div> 
              <div v-else>请先选择月份</div>
           </div>
         </div>
         <!-- 年份选择框 -->
         <div  class="xiala" :class="{'heiyear':showselectyear||showselectmonth }"  >
           <div class="select scrollyear" :class="{'heiyear':showselectyear }">
-             <div  @click="changeyear(index)" class="s_list" v-for="(item,index) in list" :key="index">
-                <div class="s_square"> <span class="s_dark" v-if="year == index"></span> </div>
-                <div class="s_title">{{item.year}}</div>
+             <div  @click="changeyear(item.yearName,item.yearId)" class="s_list" v-for="(item,index) in yearlist" :key="index">
+                <div class="s_square"> <span class="s_dark" v-if="yearName == item.yearName"></span> </div>
+                <div class="s_title">{{item.yearName}}</div>
              </div>
           </div>
+
           <div class="select scrollyear" :class="{'heiyear_month':showselectmonth }">
               
-  <div @click="chonsemonth(index)" class="s_list" v-for="(item,index) in list[0].month" :key="index">
-                   <div class="s_square"> <span class="s_dark" v-if="month == index"></span> </div>
-                   <div class="s_title">{{item.month}}</div>
+  <div @click="chonsemonth(item.monthName,item.monthTime)" class="s_list" v-for="(item,index) in monthlist" :key="index">
+                   <div class="s_square"> <span class="s_dark" v-if="monthName == item.monthName"></span> </div>
+                   <div class="s_title">{{item.monthName}}</div>
               </div>
               
            </div>
@@ -33,14 +34,14 @@
 
 
       <!-- 节目列表 -->
-      <div :class="{'dump':month>=0,'heiyear1':showselectyear||showselectmonth}"  class="jiemu_warp" >
+      <div :class="{'dump':monthTime,'heiyear1':showselectyear||showselectmonth}"  class="jiemu_warp " >
           <div @click="chonseaudio(index)" class="jiemu_list" v-for="(item,index ) in songarr" :key="index" >
-            <div class=" jiemu_left" :class="{'nowplay':cur==index}">{{item.name}}</div>
+              <div v-if="cur==index" class="list_left" >正在播放：</div>
             <div class="jiemu_title">{{item.title}}</div>
-           </div>
+        </div>
        </div>
                <!-- 查看评论 -->
-        <div v-if="cur>=0"  class="month_warp animated fadeIn">
+        <!-- <div v-if="cur>=0"  class="month_warp animated fadeIn">
            <div class="month_list" v-for="(item,index ) in list[year].month" :key="index" >
                 <div class="com_top">
                     <img src="static/img/song.png" class="avatar" alt="">
@@ -58,7 +59,7 @@
              
             
            </div>
-         </div>
+         </div> -->
       
     </div> 
 
@@ -78,8 +79,8 @@
 
 
     <!-- 音频操作 -->
-    <div v-if="showaudio" class="audiobox animated fadeInUp">
-          <audio  :src="songarr[cur].src"  id="audio" @ended="overAudio" >
+    <div v-if="showaudio " class="audiobox animated fadeInUp">
+          <audio  :src="songarr[cur].completeurl"  id="audio" @ended="overAudio" >
       <!-- <source
      
         type="audio/mp3"
@@ -119,7 +120,6 @@
             <img @click="clickBefore" src="static/img/backoff.png" class="bo_icon2" alt="">
             <img v-if="audioPlayShow" @click="playAudio" src="static/img/playbtn.png" class="bo_icon3" alt="">
             <img v-else @click="pauseAudio" src="static/img/stop.png" class="bo_icon3" alt="">
-
             <img  @click="clickAfter" src="static/img/forward.png" class="bo_icon4" alt="">
          </div>
          <img src="static/img/wechat.png" class="bo_icon5" alt="">
@@ -136,7 +136,6 @@ export default {
   data() {
     return {
       audio: "",
-      audioWidth: -2, //圆圈左边的距离
       alltime: "",
       intsecond: "", //总时长音频秒
       befort: 15, //快进快退的时间
@@ -144,10 +143,15 @@ export default {
       playstatus: 1, //1表示顺序播放 2随机 3单曲
       jishi: 0, //播放时间
       cur: -1, //音频索引
-
+    yearId:'',//选中年份
+    monthTime:'',//当前月份
       audioPlayShow: true,
+      yearName:'',
+      monthName:'',
       audioInterval: null,
       timerout: null,
+      yearlist:[],
+      monthlist:[],
       note: {
         backgroundImage:
           "url(" + require("../../static/img/jindutiao.png") + ") ",
@@ -158,7 +162,6 @@ export default {
       // 上面音乐有关
 
       year: -1, //年份索引
-      month: -1, //月份索引
       showaudio: false, //是否显示音频控件
       showselectyear: false, //是否显示年份下拉框
       showselectmonth: false,
@@ -169,136 +172,9 @@ export default {
         backgroundSize: "100% 50%",
         backgroundPosition: "bottom"
       },
-      list: [
-        {
-          year: 2019,
-          month: [
-            {
-              month: "一月",
-              flag: true
-            },
-            {
-              month: "二月",
-              flag: true
-            },
-            {
-              month: "三月",
-              flag: true
-            },
-            {
-              month: "四月",
-              flag: true
-            },
-            {
-              month: "八月",
-              flag: true
-            },
-            {
-              month: "十一月",
-              flag: true
-            },
-            {
-              month: "十一月",
-              flag: true
-            }
-          ]
-        },
-        {
-          year: 2018,
-          month: [
-            {
-              month: "二月",
-              flag: true
-            },
-            {
-              month: "三月",
-              flag: true
-            },
-            {
-              month: "四月",
-              flag: true
-            },
-            {
-              month: "八月",
-              flag: true
-            },
-            {
-              month: "十一月",
-              flag: true
-            },
-            {
-              month: "十一月",
-              flag: true
-            }
-          ]
-        },
-        {
-          year: 2020,
-          month: [
-            {
-              month: "五月",
-              flag: true
-            },
-            {
-              month: "二月",
-              flag: true
-            },
-            {
-              month: "三月",
-              flag: true
-            },
-            {
-              month: "四月",
-              flag: true
-            },
-            {
-              month: "八月",
-              flag: true
-            },
-            {
-              month: "十一月",
-              flag: true
-            },
-            {
-              month: "十一月",
-              flag: true
-            }
-          ]
-        }
-      ],
+ 
       songarr: [
-        {
-          src:
-            "http://isure.stream.qqmusic.qq.com/C400001xLIXo2w9V7U.m4a?guid=3745793350&vkey=256D0756B917CF335B9746AEA1DF582A2B603B3F34D2D5690CC54BE52423689DE9C65F34D22335EC7EB93D20275B4F9ACE69888350A90678&uin=8043&fromtag=66",
-          title:
-            "世界这么大还是遇见你世界这么大还是遇见你世界这么大还是遇见你世界这么大还是遇见你世界这么大还是遇见你",
-          name: "素人现场"
-        },
-        {
-          src:
-            "http://isure.stream.qqmusic.qq.com/C400001Wp7M30PVoGt.m4a?guid=3745793350&vkey=FF439549BB96E63E96F06A24EB88E67FDBD5B5964700ED184D183E870A2676D607D12D0B6D3E9BB1D6603DDCA259F016F6851A805C16AE5B&uin=8043&fromtag=66",
-
-          title: "也曾相识也曾相识也曾相识",
-          name: "素人读书"
-        },
-        {
-          src:
-            "http://isure.stream.qqmusic.qq.com/C400003xmjo12aDRhw.m4a?guid=3745793350&vkey=C93839530ADE69DC47D78FB8A71120A0D7B95F4A3EFF7F8F8BA71728CA11799DB11EBF89711D1D909C0527200F2DF9FB95FD72022B7766B5&uin=8043&fromtag=66",
-          title: "钟无艳钟无艳钟无艳钟无艳",
-          name: "素人晚安"
-        },
-        {
-          src:
-            "http://isure.stream.qqmusic.qq.com/C400003W9JiK14LJU5.m4a?guid=3745793350&vkey=D719F9075334E60FE03ACFBDBCAE658BA4940BC14E93D1AC0B167CBF7EE18DBF304AE5ECFAF17D11811AA12F435C577648E679995BDACC21&uin=8043&fromtag=66",
-          title: "也曾相识，左邻右里",
-          name: "素人现场"
-        },
-        {
-          src:
-            "http://isure.stream.qqmusic.qq.com/C400001xLIXo2w9V7U.m4a?guid=3745793350&vkey=256D0756B917CF335B9746AEA1DF582A2B603B3F34D2D5690CC54BE52423689DE9C65F34D22335EC7EB93D20275B4F9ACE69888350A90678&uin=8043&fromtag=66",
-          title: "世界这么大还是遇见你",
-          name: "素人晚安"
-        }
+      
       ]
     };
   },
@@ -322,29 +198,34 @@ export default {
     // 点击下拉框
     clickselect() {
       this.showselectyear = !this.showselectyear;
+      this.showselectmonth = false
     },
     // 点击月份下拉框
     clickselectMonth() {
-      if (this.year >= 0) {
+      if (this.yearName) {
+        this.showselectyear = false
         this.showselectmonth = !this.showselectmonth;
       } else {
         this.$toast("请先选择年份");
       }
     },
     // 点击具体年份
-    changeyear(i) {
-      this.year = i;
-
+    changeyear(name,sub) {
+      this.yearName = name
+      this.yearId = sub
       this.showselectyear = false;
+      this.getMonthInfo()
     },
     // 点击月份
-    chonsemonth(i) {
-      this.month = i;
+    chonsemonth(name,time) {
+      this.monthName = name
+      this.monthTime = time
       this.showselectmonth = false;
+      this.getJiemuInfo()
     },
     //是否点赞
     changeLike(i){
-this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag
+// this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag
     },
         // 播放进度
     changevalue(v) {
@@ -356,28 +237,26 @@ this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag
       this.audio.currentTime = this.jishi;
       this.playAudio();
     },
-    // 手动切换音频
+    /*
+    *手动切换音频
+    */
     chonseaudio(i) {
       if (this.cur == i) {
         return;
       }
-      clearTimeout(this.timerout);
       this.cur = i;
       this.showaudio = true;
       if (this.audio) {
         this.pauseAudio();
         this.jishi = 0;
-        this.audioWidth = -2;
+        this.value = 0
       }
       this.timerout = setTimeout(() => {
         this.playAudio();
-      }, 700);
+      }, 800);
     },
 
-    // 切换购买按钮
-    selectbuy(i) {
-      this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag;
-    },
+
     /**
      * 切换播放状态
      *
@@ -396,13 +275,54 @@ this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag
         this.$toast("切换至循环播放");
       }
     },
-
+    /**
+     * 获得年份
+     *
+     */
+    getYearInfo() {
+      this.$toast.loading({
+        message: "努力加载中...",
+        forbidClick: true,
+        duration: 500
+      });
+      let openid = this.$store.state.openid;
+      this.$request("shop/yesPurchaseYear", { openid: openid }).then(res => {
+        this.yearlist = res.response;
+      });
+    },
+    /*
+    *获得月份
+    *月份
+    */
+    getMonthInfo() {
+      let openid = this.$store.state.openid;
+      this.$request("shop/yesPurchaseMonth", {
+        openid: openid,
+        yearId: this.yearId
+      }).then(res => {
+      
+        this.monthlist = res.response;
+      });
+    },
+    /*
+    *获得节目列表
+    */ 
+    getJiemuInfo() {
+      let openid = this.$store.state.openid;
+      this.$request("show/queryShowByTime", {
+        openid: openid,
+        monthTime: this.monthTime
+      }).then(res => {
+        this.songarr = res.response;
+      });
+    },
     /**
      * 开始播放
      * */
     playAudio() {
       this.audioPlayShow = false;
       this.audio = document.getElementById("audio");
+        
       let intsecond = parseInt(this.audio.duration);
       this.intsecond = intsecond;
       let min = parseInt(intsecond / 60);
@@ -413,7 +333,8 @@ this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag
         this.jishi++;
         this.value = this.value + Number(step);
       }, 1000);
-      audio.play();
+      this.audio.play();
+     
     },
     /**
      * 暂停音频
@@ -456,7 +377,7 @@ this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag
       }
       // 单曲循环
       this.jishi = 0;
-      this.audioWidth = -1;
+      this.value = 0
       setTimeout(() => {
         this.playAudio();
       }, 600);
@@ -487,17 +408,15 @@ this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag
         this.jishi = this.jishi + this.aftert;
         this.audio.currentTime = this.jishi;
         this.value = this.value + Number(this.aftert * nowvalue);
-      } else {
-        this.jishi = this.jishi + 4;
-        this.audio.currentTime = this.jishi;
-        this.value = this.value + Number(4 * nowvalue);
-      }
+      } 
     },
     clickme() {
       this.$toast("购买后可查看");
     }
   },
-  mounted() {}
+  mounted() {
+    this.getYearInfo()
+  }
 };
 </script>
 <style scoped>
@@ -582,14 +501,8 @@ this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag
   white-space: nowrap;
   display: flex;
 }
-.jiemu_left {
-  color: #333;
-  width: 68px;
-  font-size: 12px;
-  border-right: 1px solid #333;
-}
+
 .jiemu_title {
-  margin-left: 10px;
   font-size: 12px;
   color: #666;
   flex: 1;
@@ -786,5 +699,10 @@ this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag
 .current {
   background: darkblue;
   color: #fff;
+}
+.list_left {
+  width: 60px;
+  font-size: 12px;
+  color: #333;
 }
 </style>

@@ -37,7 +37,7 @@
       <!-- 节目列表 -->
       <div :class="{'dump':songarr.length>=0}"  class="jiemu_warp" >
           <div @click="chonseaudio(index)" class="jiemu_list" v-for="(item,index ) in songarr" :key="index" >
-            <div v-if="cur==index" class="list_left jiemu_left" >正在播放：</div>
+            <div v-if="cur==index" class="list_left" >正在播放：</div>
             <div class="jiemu_title">{{item.title}}</div>
            </div>
        </div>
@@ -104,13 +104,14 @@
 
             <img  @click="clickAfter" src="static/img/forward.png" class="bo_icon4" alt="">
          </div>
-         <img src="static/img/wechat.png" class="bo_icon5" alt="">
+         <img  @click="clickme" src="static/img/wechat.png" class="bo_icon5" alt="">
        </div>
     </div>
 
   </div>
 </template>
 <script>
+import wx from 'weixin-js-sdk'
 import { Slider } from "vant";
 export default {
   data() {
@@ -140,7 +141,7 @@ export default {
       value: 0,
       yearId: "",
       yearName: "",
-      monthTime: "2018-11-01",
+      monthTime: "",
 
       showaudio: false, //是否显示音频控件
       showselectyear: false, //是否显示年份下拉框
@@ -258,11 +259,10 @@ export default {
       if (this.audio) {
         this.pauseAudio();
         this.jishi = 0;
-        this.audioWidth = -2;
+        this.value = 0
       }
       this.timerout = setTimeout(() => {
         this.playAudio();
-        // this.movemusic()
       }, 700);
     },
     // 微信支付
@@ -300,6 +300,43 @@ export default {
         this.$toast("切换至循环播放");
       }
     },
+      getURLParams(name){
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+    var r = window.location.search.substr(1).match(reg);
+    if (r != null) {
+        return unescape(r[2]);
+    }
+    return null;
+},
+    paymoney(){
+      var appId = this.getURLParams('appid');
+
+var timeStamp = this.getURLParams('timeStamp');
+var nonceStr = this.getURLParams('nonceStr');
+var packageValue  = this.getURLParams('packageValue');
+var paySign = this.getURLParams('paySign');
+var money = this.getURLParams('money');
+       wx.config({
+               debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+               appId: appId, // 必填，公众号的唯一标识
+               timestamp: timeStamp, // 必填，生成签名的时间戳
+               nonceStr: nonceStr, // 必填，生成签名的随机串
+               signature: paySign,// 必填，签名，见附录1
+               jsApiList: ['chooseWXPay'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+           });
+                  wx.chooseWXPay({
+                   appId:appId,
+                   timestamp: timeStamp, // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
+                   nonceStr: nonceStr, // 支付签名随机串，不长于 32 位
+                   package: packageValue, // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=***）
+                   signType: 'MD5', // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
+                   paySign: paySign, // 支付签名
+                   success: function (res) {
+                     this.$toast('支付成功')
+                       // 支付成功后的回调函数
+                   }
+               });
+    },
 
     /**
      * 开始播放
@@ -317,7 +354,7 @@ export default {
         this.jishi++;
         this.value = this.value + Number(step);
       }, 1000);
-      audio.play();
+      this.audio.play();
     },
     /**
      * 暂停音频
@@ -389,11 +426,7 @@ export default {
         this.jishi = this.jishi + this.aftert;
         this.audio.currentTime = this.jishi;
         this.value = this.value + Number(this.aftert * nowvalue);
-      } else {
-        this.jishi = this.jishi + 4;
-        this.audio.currentTime = this.jishi;
-        this.value = this.value + Number(4 * nowvalue);
-      }
+      } 
     },
     clickme() {
       this.$toast("购买后可查看");
@@ -401,7 +434,7 @@ export default {
   },
   mounted() {
     this.getYearInfo();
-    this.getJiemuInfo();
+    
   }
 };
 </script>
@@ -533,9 +566,7 @@ export default {
   white-space: nowrap;
   display: flex;
 }
-.jiemu_left {
-  /* border-right: 1px solid #333; */
-}
+
 .jiemu_title {
   font-size: 12px;
   color: #666;
