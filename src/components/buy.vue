@@ -41,8 +41,8 @@
         </div>
        </div>
                <!-- 查看评论 -->
-        <!-- <div v-if="cur>=0"  class="month_warp animated fadeIn">
-           <div class="month_list" v-for="(item,index ) in list[year].month" :key="index" >
+        <div v-if="commentlist.length>=0"  class="month_warp animated fadeIn">
+           <div class="month_list" v-for="(item,index ) in commentlist" :key="index" >
                 <div class="com_top">
                     <img src="static/img/song.png" class="avatar" alt="">
                     <div class="nickname">{{item.month}}</div>
@@ -59,7 +59,7 @@
              
             
            </div>
-         </div> -->
+         </div>
       
     </div> 
 
@@ -122,15 +122,20 @@
             <img v-else @click="pauseAudio" src="static/img/stop.png" class="bo_icon3" alt="">
             <img  @click="clickAfter" src="static/img/forward.png" class="bo_icon4" alt="">
          </div>
-         <img src="static/img/wechat.png" class="bo_icon5" alt="">
+         <img src="static/img/wechat.png" @click="clickIpticon" class="bo_icon5" alt="">
        </div>
     </div>
-
+<van-action-sheet v-model="showinput" title="评论">
+  <div class="action_content">
+     <input placeholder="请输入评论内容" @blur="onBlurInput" v-model="comment" type="text">
+     <div class="submit">点击提交</div>
+  </div>
+</van-action-sheet>
 
   </div>
 </template>
 <script>
-import { Slider } from "vant";
+import { Slider,ActionSheet } from "vant";
 
 export default {
   data() {
@@ -148,10 +153,13 @@ export default {
       audioPlayShow: true,
       yearName:'',
       monthName:'',
+      showinput:true,//是否显示提示框
       audioInterval: null,
       timerout: null,
       yearlist:[],
       monthlist:[],
+      commentlist:[],
+      comment:'',
       note: {
         backgroundImage:
           "url(" + require("../../static/img/jindutiao.png") + ") ",
@@ -254,9 +262,25 @@ export default {
       this.timerout = setTimeout(() => {
         this.playAudio();
       }, 800);
+      this.getcomment()
+
     },
 
-
+/**
+  获得评论列表
+ */
+ getcomment(){
+ let openid = this.$store.state.openid;
+ let showId = this.songarr[this.cur].id
+      this.$request("comment/queryList", { openid: openid,showId:showId }).then(res => {
+        // this.commentlist = res.response;
+        console.log(res)
+      });
+ },
+// 显示提示框
+clickIpticon(){
+  this.showinput = true
+},
     /**
      * 切换播放状态
      *
@@ -316,6 +340,10 @@ export default {
         this.songarr = res.response;
       });
     },
+    // ios input 框问题
+    onBlurInput () {
+				window.scroll(0, 0)
+			},
     /**
      * 开始播放
      * */
@@ -602,7 +630,32 @@ export default {
 
 
 
+.action_content{
+  box-sizing: border-box;
+  padding: 40px 30px;
+  text-align: center;
 
+}
+.action_content input{
+  font-size: 12px;
+  width: 84%;
+  border: 1px solid #ebde95;
+  padding: 8px 8px;
+  border-radius: 6px;
+}
+.submit{
+  width: 55%;
+
+  margin: 20px auto;
+  height: 30px;
+    background: linear-gradient(to right, #a39b6f 0%,#d1d425 100%);
+    color: #fff;
+    text-align: center;
+    line-height: 30px;
+  border-radius: 15px;
+  font-size: 14px;
+
+}
 
 
 /* 音频相关 */

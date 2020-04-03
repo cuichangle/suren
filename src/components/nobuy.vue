@@ -277,6 +277,16 @@ export default {
           time.push(v.monthTime);
         }
       });
+            this.$toast.loading({
+        message: "努力加载中...",
+        forbidClick: true,
+        duration: 500
+      });
+      let openid = this.$store.state.openid;
+      this.$request("wechart/userSaveSub", { openid: openid,time:time }).then(res => {
+       console.log(res)
+      });
+
     },
     // 切换购买按钮
     selectbuy(i) {
@@ -308,7 +318,7 @@ export default {
     }
     return null;
 },
-    paymoney(){
+    wxpaymoney(){
       var appId = this.getURLParams('appid');
 
 var timeStamp = this.getURLParams('timeStamp');
