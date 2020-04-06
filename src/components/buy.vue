@@ -128,7 +128,7 @@
 <van-action-sheet v-model="showinput" title="评论">
   <div class="action_content">
      <input placeholder="请输入评论内容" @blur="onBlurInput" v-model="comment" type="text">
-     <div class="submit">点击提交</div>
+     <div class="submit" @click="addcomment">点击提交</div>
   </div>
 </van-action-sheet>
 
@@ -151,6 +151,7 @@ export default {
     yearId:'',//选中年份
     monthTime:'',//当前月份
       audioPlayShow: true,
+      gotype:0,//首次进入 1购买后进入
       yearName:'',
       monthName:'',
       showinput:true,//是否显示提示框
@@ -160,6 +161,8 @@ export default {
       monthlist:[],
       commentlist:[],
       comment:'',
+      pageNum:1,
+      pageSize:10,
       note: {
         backgroundImage:
           "url(" + require("../../static/img/jindutiao.png") + ") ",
@@ -207,10 +210,12 @@ export default {
     clickselect() {
       this.showselectyear = !this.showselectyear;
       this.showselectmonth = false
+      this.getYearInfo()
     },
     // 点击月份下拉框
     clickselectMonth() {
       if (this.yearName) {
+        this.getMonthInfo()
         this.showselectyear = false
         this.showselectmonth = !this.showselectmonth;
       } else {
@@ -272,11 +277,31 @@ export default {
  getcomment(){
  let openid = this.$store.state.openid;
  let showId = this.songarr[this.cur].id
-      this.$request("comment/queryList", { openid: openid,showId:showId }).then(res => {
+ let data = {
+   openid,
+   showId,
+   pageNum:this.pageNum,
+   pageSize:this.pageSize
+ }
+      this.$request("comment/queryList", data).then(res => {
         // this.commentlist = res.response;
         console.log(res)
       });
  },
+//  添加评论
+addcomment(){
+ let openid = this.$store.state.openid;
+ let showId = this.songarr[this.cur].id
+ let data = {
+   openid,
+   showId,
+   info:this.comment
+ }
+      this.$request("comment/queryList", data).then(res => {
+        // this.commentlist = res.response;
+        console.log(res)
+      });
+},
 // 显示提示框
 clickIpticon(){
   this.showinput = true
@@ -440,10 +465,31 @@ clickIpticon(){
     },
     clickme() {
       this.$toast("购买后可查看");
-    }
+    },
+    //  获得节目信息
+getalllist(){
+ let openid = this.$store.state.openid;
+
+ let data = {
+   openid,
+   type:this.gotype
+ }
+      this.$request("show/initYesPayInfo", data).then(res => {
+        // this.commentlist = res.response;
+
+        this.yearName = res.response.yearInfo.yearName
+        this.monthName = res.response.monthInfo.monthName
+        this.songarr =  res.response.showList
+        this.yearId =  res.response.yearInfo.yearId
+        this.monthTime = res.response.monthInfo.monthTime
+        
+        
+      });
+},
   },
   mounted() {
-    this.getYearInfo()
+    // this.getYearInfo()
+    this.getalllist()
   }
 };
 </script>
