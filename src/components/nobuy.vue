@@ -111,7 +111,7 @@
   </div>
 </template>
 <script>
-import wx from 'weixin-js-sdk'
+import wx from "weixin-js-sdk";
 import { Slider } from "vant";
 export default {
   data() {
@@ -129,7 +129,7 @@ export default {
       audioPlayShow: true,
       audioInterval: null,
       timerout: null,
-      money: 30, //默认一期金额
+      money: 0, //默认一期金额
       note: {
         backgroundImage:
           "url(" + require("../../static/img/jindutiao.png") + ") ",
@@ -259,7 +259,7 @@ export default {
       if (this.audio) {
         this.pauseAudio();
         this.jishi = 0;
-        this.value = 0
+        this.value = 0;
       }
       this.timerout = setTimeout(() => {
         this.playAudio();
@@ -277,16 +277,17 @@ export default {
           time.push(v.monthTime);
         }
       });
-            this.$toast.loading({
+      this.$toast.loading({
         message: "努力加载中...",
         forbidClick: true,
         duration: 500
       });
       let openid = this.$store.state.openid;
-      this.$request("wechart/userSaveSub", { openid: openid,time:time }).then(res => {
-       console.log(res)
-      });
-
+      this.$request("wechart/userSaveSub", { openid: openid, time: time }).then(
+        res => {
+          console.log(res);
+        }
+      );
     },
     // 切换购买按钮
     selectbuy(i) {
@@ -310,42 +311,42 @@ export default {
         this.$toast("切换至循环播放");
       }
     },
-      getURLParams(name){
-    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
-    var r = window.location.search.substr(1).match(reg);
-    if (r != null) {
+    getURLParams(name) {
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+      var r = window.location.search.substr(1).match(reg);
+      if (r != null) {
         return unescape(r[2]);
-    }
-    return null;
-},
-    wxpaymoney(){
-      var appId = this.getURLParams('appid');
+      }
+      return null;
+    },
+    wxpaymoney() {
+      var appId = this.getURLParams("appid");
 
-var timeStamp = this.getURLParams('timeStamp');
-var nonceStr = this.getURLParams('nonceStr');
-var packageValue  = this.getURLParams('packageValue');
-var paySign = this.getURLParams('paySign');
-var money = this.getURLParams('money');
-       wx.config({
-               debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
-               appId: appId, // 必填，公众号的唯一标识
-               timestamp: timeStamp, // 必填，生成签名的时间戳
-               nonceStr: nonceStr, // 必填，生成签名的随机串
-               signature: paySign,// 必填，签名，见附录1
-               jsApiList: ['chooseWXPay'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
-           });
-                  wx.chooseWXPay({
-                   appId:appId,
-                   timestamp: timeStamp, // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
-                   nonceStr: nonceStr, // 支付签名随机串，不长于 32 位
-                   package: packageValue, // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=***）
-                   signType: 'MD5', // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
-                   paySign: paySign, // 支付签名
-                   success: function (res) {
-                     this.$toast('支付成功')
-                       // 支付成功后的回调函数
-                   }
-               });
+      var timeStamp = this.getURLParams("timeStamp");
+      var nonceStr = this.getURLParams("nonceStr");
+      var packageValue = this.getURLParams("packageValue");
+      var paySign = this.getURLParams("paySign");
+      var money = this.getURLParams("money");
+      wx.config({
+        debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+        appId: appId, // 必填，公众号的唯一标识
+        timestamp: timeStamp, // 必填，生成签名的时间戳
+        nonceStr: nonceStr, // 必填，生成签名的随机串
+        signature: paySign, // 必填，签名，见附录1
+        jsApiList: ["chooseWXPay"] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+      });
+      wx.chooseWXPay({
+        appId: appId,
+        timestamp: timeStamp, // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
+        nonceStr: nonceStr, // 支付签名随机串，不长于 32 位
+        package: packageValue, // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=***）
+        signType: "MD5", // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
+        paySign: paySign, // 支付签名
+        success: function(res) {
+          this.$toast("支付成功");
+          // 支付成功后的回调函数
+        }
+      });
     },
 
     /**
@@ -436,15 +437,19 @@ var money = this.getURLParams('money');
         this.jishi = this.jishi + this.aftert;
         this.audio.currentTime = this.jishi;
         this.value = this.value + Number(this.aftert * nowvalue);
-      } 
+      }
     },
     clickme() {
       this.$toast("购买后可查看");
     }
   },
   mounted() {
+    let moeny = localStorage.getItem('money')
+    if(money){
+      this.money = Number(money)
+    }
+  
     this.getYearInfo();
-    
   }
 };
 </script>

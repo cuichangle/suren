@@ -84,14 +84,17 @@ export default {
       this.$request('index/info',{openid:openid}).then(res=>{
         this.indexTop = res.response.indexTop
         this.userShopInfo = res.response.userShopInfo
-
-
+        localStorage.setItem('money',res.response.priceInfo)
+        let img = res.response.indexTop.backgroundImg
+        if(img.length>11){
+          this.note.backgroundImage="url(" + img + ") "
+        }
       })
     }
     
   },
   mounted() {
-    let id = this.getUrlParam('openid')||'oUWMrwX2009ZBdhqlKi-rD0OeMSI'
+    let id = this.getUrlParam('openid')
     if(id){
         this.$store.commit('changeOpenid',id)
     }else{

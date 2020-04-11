@@ -41,25 +41,23 @@
         </div>
        </div>
                <!-- 查看评论 -->
-        <div v-if="commentlist.length>=0"  class="month_warp animated fadeIn">
+        <div  @scroll="scrollGet($event)" v-if="commentlist.length>0"  class="month_warp animated fadeIn">
            <div class="month_list" v-for="(item,index ) in commentlist" :key="index" >
                 <div class="com_top">
-                    <img src="static/img/song.png" class="avatar" alt="">
-                    <div class="nickname">{{item.month}}</div>
-                    <div class="creattime">{{item.month}}</div>
-                    <van-icon  @click="changeLike(index)" class="like_icon" :class="{'islike':item.flag}"  size="20" name="good-job-o" />
+                    <img :src="item.photo" class="avatar" alt="">
+                    <div class="nickname">{{item.username}} <span class="grade">{{item.grade}}</span></div>
+                    <div class="creattime">{{item.createTime}}</div>
+                    <van-icon  @click="changeLike(item.id,index)" class="like_icon" :class="{'islike':item.isPraose}"  size="20" name="good-job-o" />
+                    <span class="dianzan " :class="{'islike':item.isPraose}">{{item.praiseNum}}点赞</span>
                 </div>
                 <div class="com_content">
                      
-                                用周迅的话说：的您是否烦恼都送搜电话呢你公司发发吧
-和不凡发哦哦好烦叫皮肤就阿訇阿飞好好房号
+                             {{item.info}}
                             
                 </div>
-              
-             
-            
            </div>
          </div>
+         <div class="nocoment" v-else>暂无评论~</div>
       
     </div> 
 
@@ -135,7 +133,7 @@
   </div>
 </template>
 <script>
-import { Slider,ActionSheet } from "vant";
+import { Slider, ActionSheet } from "vant";
 
 export default {
   data() {
@@ -148,21 +146,24 @@ export default {
       playstatus: 1, //1表示顺序播放 2随机 3单曲
       jishi: 0, //播放时间
       cur: -1, //音频索引
-    yearId:'',//选中年份
-    monthTime:'',//当前月份
+      yearId: "", //选中年份
+      monthTime: "", //当前月份
       audioPlayShow: true,
-      gotype:0,//首次进入 1购买后进入
-      yearName:'',
-      monthName:'',
-      showinput:true,//是否显示提示框
+      gotype: 0, //首次进入 1购买后进入
+      yearName: "",
+      monthName: "",
+      showinput: false, //是否显示提示框
       audioInterval: null,
       timerout: null,
-      yearlist:[],
-      monthlist:[],
-      commentlist:[],
-      comment:'',
-      pageNum:1,
-      pageSize:10,
+      yearlist: [],
+      monthlist: [],
+      commentlist: [],
+      comment: "",
+      pageNum: 1,
+      pageSize: 10,
+      playcount: 0, //播放时间，大于10s 即请求接口
+      twointerVal: null, //第二个计时器
+      hei: "",
       note: {
         backgroundImage:
           "url(" + require("../../static/img/jindutiao.png") + ") ",
@@ -176,17 +177,16 @@ export default {
       showaudio: false, //是否显示音频控件
       showselectyear: false, //是否显示年份下拉框
       showselectmonth: false,
-      value:0,
+      value: 0,
       selectData: {
         backgroundImage: "url(" + require("../../static/img/xiala.png") + ") ",
         backgroundRepeat: "no-repeat",
         backgroundSize: "100% 50%",
         backgroundPosition: "bottom"
       },
- 
-      songarr: [
-      
-      ]
+
+      songarr: [],
+      allow: true //是否请求
     };
   },
   computed: {
@@ -209,38 +209,70 @@ export default {
     // 点击下拉框
     clickselect() {
       this.showselectyear = !this.showselectyear;
-      this.showselectmonth = false
-      this.getYearInfo()
+      this.showselectmonth = false;
+      this.getYearInfo();
     },
     // 点击月份下拉框
     clickselectMonth() {
       if (this.yearName) {
-        this.getMonthInfo()
-        this.showselectyear = false
+        this.getMonthInfo();
+        this.showselectyear = false;
         this.showselectmonth = !this.showselectmonth;
       } else {
         this.$toast("请先选择年份");
       }
     },
+    scrollGet(e) {
+      let shei = this.hei.clientHeight;
+      let allhei = this.hei.scrollHeight;
+      let mhei = e.srcElement.scrollTop;
+
+      if (shei + mhei >= allhei) {
+        if (this.allow) {
+          this.pageNum++;
+          this.getcomment();
+        } else {
+          console.log("数据请求完毕");
+        }
+      }
+    },
     // 点击具体年份
-    changeyear(name,sub) {
-      this.yearName = name
-      this.yearId = sub
+    changeyear(name, sub) {
+      this.yearName = name;
+      this.yearId = sub;
       this.showselectyear = false;
-      this.getMonthInfo()
+      this.getMonthInfo();
     },
     // 点击月份
-    chonsemonth(name,time) {
-      this.monthName = name
-      this.monthTime = time
+    chonsemonth(name, time) {
+      this.monthName = name;
+      this.monthTime = time;
       this.showselectmonth = false;
-      this.getJiemuInfo()
+      this.getJiemuInfo();
     },
     //是否点赞
-    changeLike(i){
-// this.list[this.year].month[i].flag = !this.list[this.year].month[i].flag
+    changeLike(id,index) {
+      if( this.commentlist[index].isPraose){
+          this.commentlist[index].praiseNum --
+          this.goodlike('comment/cancelCommentPraise',id)
+      }else{
+          this.commentlist[index].praiseNum ++
+          this.goodlike('comment/saveCommentPraise',id)
+
+      }
+      this.commentlist[index].isPraose = !this.commentlist[index].isPraose
+      
     },
-        // 播放进度
+    goodlike(url,id){
+      let data = {
+        openid:this.$store.state.openid,
+        commentId:id
+      }
+         this.$request(url, data).then(res => {
+        
+      });
+    },
+    // 播放进度
     changevalue(v) {
       this.pauseAudio();
       this.jishi = parseInt(this.intsecond / 100 * v);
@@ -258,54 +290,104 @@ export default {
         return;
       }
       this.cur = i;
+      this.pageSize = 1
       this.showaudio = true;
       if (this.audio) {
         this.pauseAudio();
         this.jishi = 0;
-        this.value = 0
+        this.value = 0;
       }
-      this.timerout = setTimeout(() => {
-        this.playAudio();
-      }, 800);
-      this.getcomment()
+      let that = this;
+     
+      this.$nextTick(() => {
+        let audio = document.getElementById("audio");
 
+        audio.addEventListener("canplay", function() {
+          //监听audio是否加载完毕，如果加载完毕，则读取audio播放时间
+          that.playAudio();
+          that.addcount(0);
+        });
+      });
+
+      // this.timerout = setTimeout(() => {
+      //   this.playAudio();
+      // }, 800);
+      this.getcomment();
     },
+    //  定时器处理函数
+    addcount(count) {
+      if (this.twointerVal) {
+        clearInterval(this.twointerVal);
+      }
+      this.playcount = count;
+      this.twointerVal = setInterval(() => {
+        console.log(this.playcount);
+        this.playcount = Number(this.playcount) + 1;
+        if (this.playcount >= 10) {
+          clearInterval(this.twointerVal);
+          this.savePlayNUm();
+        }
+      }, 1000);
+    },
+    // 增加播放量接口
+    savePlayNUm() {
+      let openid = this.$store.state.openid;
+      let showId = this.songarr[this.cur].id;
+      let data = {
+        openid,
+        showId
+      };
 
-/**
+      this.$request("show/savePlayNum", data).then(res => {});
+    },
+    /**
   获得评论列表
  */
- getcomment(){
- let openid = this.$store.state.openid;
- let showId = this.songarr[this.cur].id
- let data = {
-   openid,
-   showId,
-   pageNum:this.pageNum,
-   pageSize:this.pageSize
- }
+    getcomment() {
+      let openid = this.$store.state.openid;
+      let showId = this.songarr[this.cur].id;
+      let data = {
+        openid,
+        showId,
+        pageNum: this.pageNum,
+        pageSize: this.pageSize
+      };
       this.$request("comment/queryList", data).then(res => {
-        // this.commentlist = res.response;
-        console.log(res)
+        if (this.pageNum == 1) {
+          this.commentlist = [];
+        }
+        this.commentlist = this.commentlist.concat(res.response.list);
+        if (!res.response.nextPage) {
+          this.allow = false;
+        }
+
+        let that = this;
+        this.$nextTick(() => {
+          if (that.commentlist.length) {
+            let hei = document.getElementsByClassName("month_warp")[0];
+            that.hei = hei;
+          }
+        });
       });
- },
-//  添加评论
-addcomment(){
- let openid = this.$store.state.openid;
- let showId = this.songarr[this.cur].id
- let data = {
-   openid,
-   showId,
-   info:this.comment
- }
-      this.$request("comment/queryList", data).then(res => {
-        // this.commentlist = res.response;
-        console.log(res)
+    },
+    //  添加评论
+    addcomment() {
+      let openid = this.$store.state.openid;
+      let showId = this.songarr[this.cur].id;
+      let data = {
+        openid,
+        showId,
+        info: this.comment
+      };
+      this.$request("comment/saveShowComment", data).then(res => {
+        this.showinput = false;
+        this.getcomment();
       });
-},
-// 显示提示框
-clickIpticon(){
-  this.showinput = true
-},
+    },
+    // 显示提示框
+    clickIpticon() {
+      this.showinput = true;
+    },
     /**
      * 切换播放状态
      *
@@ -329,11 +411,6 @@ clickIpticon(){
      *
      */
     getYearInfo() {
-      this.$toast.loading({
-        message: "努力加载中...",
-        forbidClick: true,
-        duration: 500
-      });
       let openid = this.$store.state.openid;
       this.$request("shop/yesPurchaseYear", { openid: openid }).then(res => {
         this.yearlist = res.response;
@@ -349,13 +426,13 @@ clickIpticon(){
         openid: openid,
         yearId: this.yearId
       }).then(res => {
-      
         this.monthlist = res.response;
       });
     },
     /*
     *获得节目列表
-    */ 
+    */
+
     getJiemuInfo() {
       let openid = this.$store.state.openid;
       this.$request("show/queryShowByTime", {
@@ -366,33 +443,36 @@ clickIpticon(){
       });
     },
     // ios input 框问题
-    onBlurInput () {
-				window.scroll(0, 0)
-			},
+    onBlurInput() {
+      window.scroll(0, 0);
+    },
     /**
      * 开始播放
      * */
     playAudio() {
       this.audioPlayShow = false;
       this.audio = document.getElementById("audio");
-        
+
       let intsecond = parseInt(this.audio.duration);
       this.intsecond = intsecond;
       let min = parseInt(intsecond / 60);
       let second = intsecond % 60 < 10 ? "0" + intsecond % 60 : intsecond % 60;
       this.alltime = min + ":" + second;
       let step = Number(100 / intsecond).toFixed(3);
+      clearInterval(this.audioInterval);
       this.audioInterval = setInterval(() => {
         this.jishi++;
         this.value = this.value + Number(step);
       }, 1000);
       this.audio.play();
-     
+      this.addcount(this.playcount);
     },
     /**
      * 暂停音频
      */
     pauseAudio() {
+      // 请求次数请求
+      clearInterval(this.twointerVal);
       this.audioPlayShow = true;
       this.audio.pause();
       clearInterval(this.audioInterval);
@@ -430,13 +510,13 @@ clickIpticon(){
       }
       // 单曲循环
       this.jishi = 0;
-      this.value = 0
+      this.value = 0;
       setTimeout(() => {
         this.playAudio();
       }, 600);
       console.log("当前播放", this.cur);
     },
-     // 快退
+    // 快退
     clickBefore() {
       if (!this.audio) {
         return;
@@ -461,35 +541,38 @@ clickIpticon(){
         this.jishi = this.jishi + this.aftert;
         this.audio.currentTime = this.jishi;
         this.value = this.value + Number(this.aftert * nowvalue);
-      } 
+      }
     },
     clickme() {
       this.$toast("购买后可查看");
     },
     //  获得节目信息
-getalllist(){
- let openid = this.$store.state.openid;
+    getalllist() {
+      this.$toast.loading({
+        message: "努力加载中...",
+        forbidClick: true,
+        duration: 500
+      });
+      let openid = this.$store.state.openid;
 
- let data = {
-   openid,
-   type:this.gotype
- }
+      let data = {
+        openid,
+        type: this.gotype
+      };
       this.$request("show/initYesPayInfo", data).then(res => {
         // this.commentlist = res.response;
 
-        this.yearName = res.response.yearInfo.yearName
-        this.monthName = res.response.monthInfo.monthName
-        this.songarr =  res.response.showList
-        this.yearId =  res.response.yearInfo.yearId
-        this.monthTime = res.response.monthInfo.monthTime
-        
-        
+        this.yearName = res.response.yearInfo.yearName;
+        this.monthName = res.response.monthInfo.monthName;
+        this.songarr = res.response.showList;
+        this.yearId = res.response.yearInfo.yearId;
+        this.monthTime = res.response.monthInfo.monthTime;
       });
-},
+    }
   },
   mounted() {
     // this.getYearInfo()
-    this.getalllist()
+    this.getalllist();
   }
 };
 </script>
@@ -523,7 +606,6 @@ getalllist(){
   position: absolute;
 }
 
-
 .s_list {
   font-size: 12px;
   color: #333;
@@ -548,7 +630,6 @@ getalllist(){
   height: 8px;
   background: #101010;
 }
-
 
 .jiemu_warp {
   margin-top: 15px;
@@ -618,32 +699,37 @@ getalllist(){
 }
 .month_list {
   margin-top: 18px;
-
 }
 
-.com_top{
-   align-items: center;
+.com_top {
+  align-items: center;
   display: flex;
   justify-content: space-between;
-
 }
-.like_icon{
+.like_icon {
   color: #959595;
-  opacity: .6;
+  opacity: 0.6;
   margin-left: auto;
 }
-.islike{
-  opacity: .7;
+.dianzan{
+  font-size: 12px;
+  display: inline-block;
+  margin-left: 3px;
+  color: rgb(107, 107, 107);
+}
+.islike {
+  opacity: 0.7;
   color: #000;
   font-weight: 600;
 }
-.avatar{
+
+.avatar {
   width: 23px;
   height: 23px;
   border-radius: 23px;
   margin-right: 9px;
 }
-.nickname{
+.nickname {
   color: #333333;
   white-space: nowrap;
   font-size: 9px;
@@ -652,57 +738,46 @@ getalllist(){
   overflow: hidden;
   margin-right: 9px;
 }
-.creattime{
- font-size: 8px;
- color: rgb(107, 107, 107);
+.grade{
+  font-size: 15px;
+  color: #333;
+  
+  font-weight: 600;
 }
-.com_content{
+.creattime {
+  font-size: 8px;
+  color: rgb(107, 107, 107);
+}
+.com_content {
   padding: 6px 0 6px 32px;
   font-size: 12px;
   color: #333;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-.action_content{
+.action_content {
   box-sizing: border-box;
   padding: 40px 30px;
   text-align: center;
-
 }
-.action_content input{
+.action_content input {
   font-size: 12px;
   width: 84%;
   border: 1px solid #ebde95;
   padding: 8px 8px;
   border-radius: 6px;
 }
-.submit{
+.submit {
   width: 55%;
 
   margin: 20px auto;
   height: 30px;
-    background: linear-gradient(to right, #a39b6f 0%,#d1d425 100%);
-    color: #fff;
-    text-align: center;
-    line-height: 30px;
+  background: linear-gradient(to right, #a39b6f 0%, #d1d425 100%);
+  color: #fff;
+  text-align: center;
+  line-height: 30px;
   border-radius: 15px;
   font-size: 14px;
-
 }
-
 
 /* 音频相关 */
 .audiobox {
@@ -762,7 +837,6 @@ getalllist(){
   flex: 1;
 }
 .cen_icon {
-
   width: 13px;
   height: 13px;
 }
@@ -804,4 +878,12 @@ getalllist(){
   font-size: 12px;
   color: #333;
 }
+.nocoment {
+  line-height: 100px;
+  font-size: 14px;
+  color: #959595;
+  text-align: center;
+}
+
+
 </style>
