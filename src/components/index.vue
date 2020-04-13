@@ -94,6 +94,7 @@ export default {
     
   },
   mounted() {
+    console.log('gitceshi')
     let id = this.getUrlParam('openid')
     if(id){
         this.$store.commit('changeOpenid',id)
