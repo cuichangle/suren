@@ -43,7 +43,7 @@ export default {
       userShopInfo:{},
 
       note: {
-        backgroundImage: "url(" + require("../../static/img/home2.png") + ") ",
+        backgroundImage: "url(" + require("../../static/img/home2.jpg") + ") ",
         backgroundRepeat: "no-repeat",
         backgroundSize: "100% 100%"
       }

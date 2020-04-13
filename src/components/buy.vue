@@ -321,7 +321,6 @@ export default {
       }
       this.playcount = count;
       this.twointerVal = setInterval(() => {
-        console.log(this.playcount);
         this.playcount = Number(this.playcount) + 1;
         if (this.playcount >= 10) {
           clearInterval(this.twointerVal);

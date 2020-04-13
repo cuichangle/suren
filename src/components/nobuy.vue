@@ -444,7 +444,7 @@ export default {
     }
   },
   mounted() {
-    let moeny = localStorage.getItem('money')
+    let money = localStorage.getItem('money')
     if(money){
       this.money = Number(money)
     }
