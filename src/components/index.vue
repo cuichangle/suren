@@ -140,8 +140,8 @@ export default {
 
 .footer {
   position: fixed;
-  bottom: 8vh;
-  left: 39vw;
+  bottom: 6.4vh;
+  left: 38.3vw;
   width: 20px;
   text-align: center;
   line-height: 20px;
