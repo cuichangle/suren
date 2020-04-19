@@ -3,8 +3,9 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 const store = new Vuex.Store({
     state:{
-        openid:'oUWMrwX2009ZBdhqlKi-rD0OeMSI',//顺序播放 2表示随机 3 表示单曲
-        money:''
+        openid:localStorage.getItem('openid') || 'oUWMrwX2009ZBdhqlKi-rD0OeMSI',
+        money:'',
+      
   
     },
     getters:{
@@ -16,6 +17,7 @@ const store = new Vuex.Store({
      
         changeOpenid(state,val){
             state.openid = val
+            
         },
         changeMoney(state,value){
             state.money = value

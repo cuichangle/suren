@@ -25,7 +25,7 @@
         <div v-if="monthlist.length" :class="{'heiyear1':showselectyear}" class="month_warp">
            <div class="month_list" v-for="(item,index ) in monthlist" :key="index" >
               <div class="list_left">{{item.monthName}}</div>
-              <div @click="chonsemonth(item.monthTime)" class="list_cen">点击浏览本月全部节目</div>
+              <div @click="chonsemonth(item.monthTime)" :class="{'currentMonth':item.monthTime == tempmonth}" class="list_cen">点击浏览本月全部节目</div>
               <div @click="selectbuy(index)" class="list_right">
                   <img v-if="item.flag" src="/static/img/chonse.png" alt="">
                   <img v-else src="/static/img/nochonse.png" alt="">
@@ -37,7 +37,7 @@
       <!-- 节目列表 -->
       <div :class="{'dump':songarr.length>=0}"  class="jiemu_warp" >
           <div @click="chonseaudio(index)" class="jiemu_list" v-for="(item,index ) in songarr" :key="index" >
-            <div v-if="cur==index" class="list_left" >正在播放：</div>
+            <div v-if="cur==index && tempmonth == monthTime" class="list_left" >正在播放：</div>
             <div class="jiemu_title">{{item.title}}</div>
            </div>
        </div>
@@ -61,7 +61,7 @@
 
     <!-- 音频操作 -->
     <div v-if="showaudio" class="audiobox animated fadeInUp">
-          <audio  :src="songarr[cur].trialurl"  id="audio" @ended="overAudio" >
+          <audio  @loadeddata ="loadeddataFun"   @canplaythrough='canplaythroughFun' :src="trialurl"  id="audio" @ended="overAudio" >
       <!-- <source
      
         type="audio/mp3"
@@ -104,7 +104,7 @@
 
             <img  @click="clickAfter" src="static/img/forward.png" class="bo_icon4" alt="">
          </div>
-         <img  @click="clickme" src="static/img/wechat.png" class="bo_icon5" alt="">
+         <img  @click="clickme(5)" src="static/img/wechat.png" class="bo_icon5" alt="">
        </div>
     </div>
 
@@ -112,6 +112,7 @@
 </template>
 <script>
 import wx from "weixin-js-sdk";
+import axios from 'axios'
 import { Slider } from "vant";
 export default {
   data() {
@@ -136,7 +137,7 @@ export default {
         backgroundRepeat: "no-repeat",
         backgroundSize: "100% 100%"
       },
-
+trialurl:'',
       // 上面音乐有关
       value: 0,
       yearId: "",
@@ -153,9 +154,11 @@ export default {
         backgroundPosition: "bottom"
       },
       yearlist: [],
+      tempmonth:'',//控制显示正在播放
       monthlist: [],
 
-      songarr: []
+      songarr: [],
+      tempsongarr:[],
     };
   },
   computed: {
@@ -222,10 +225,11 @@ export default {
         openid: openid,
         yearId: this.yearId
       }).then(res => {
-        res.response.map(v => {
+        let temp = res.response
+        temp.map(v => {
           v.flag = true;
         });
-        this.monthlist = res.response;
+        this.monthlist = temp;
       });
     },
     // 获得节目列表
@@ -254,6 +258,9 @@ export default {
         return;
       }
       clearTimeout(this.timerout);
+      this.trialurl = this.songarr[i].trialurl
+      this.tempmonth = this.monthTime
+      this.tempsongarr = this.songarr
       this.cur = i;
       this.showaudio = true;
       if (this.audio) {
@@ -261,9 +268,18 @@ export default {
         this.jishi = 0;
         this.value = 0;
       }
-      this.timerout = setTimeout(() => {
-        this.playAudio();
-      }, 700);
+            this.$toast.loading({
+        message: "努力加载中...",
+        forbidClick: true,
+        duration: 1000
+      });
+         this.$nextTick(() => {
+ 
+
+           this.playAudio(1);
+         
+      });
+      
     },
     // 微信支付
     paymoney() {
@@ -278,16 +294,33 @@ export default {
         }
       });
       this.$toast.loading({
-        message: "努力加载中...",
+        message: '加载支付模块',
         forbidClick: true,
-        duration: 500
+        duration: 2000
       });
+      time = time.join(',')
+     
       let openid = this.$store.state.openid;
-      this.$request("wechart/userSaveSub", { openid: openid, time: time }).then(
-        res => {
-          console.log(res);
-        }
-      );
+     
+axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
+    params: {
+      openid: openid,
+      time:time
+    }
+  })
+  .then(function (res) {
+    this.$toast.clear()
+    this.wxpaymoney(res.response)
+   
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
+      // this.$request("wechart/userSaveSub", { openid: openid, time: time }).then(
+      //   res => {
+      //     console.log(res);
+      //   }
+      // );
     },
     // 切换购买按钮
     selectbuy(i) {
@@ -311,22 +344,36 @@ export default {
         this.$toast("切换至循环播放");
       }
     },
-    getURLParams(name) {
-      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
-      var r = window.location.search.substr(1).match(reg);
-      if (r != null) {
-        return unescape(r[2]);
-      }
-      return null;
-    },
-    wxpaymoney() {
-      var appId = this.getURLParams("appid");
+    getURLParams(key,url) {
+           var reg = new RegExp("(^|&)" + key + "=([^&]*)(&|$)", "i");
+         
+           var r
+           if(url){
+             
+             if(url.indexOf('nobuy')>-1){
+              
+              url = url.split('nobuy')[1]
+             }
+        r =url.substr(1).match(reg);
+           }else{
+         r = window.location.search.substr(1).match(reg);
 
-      var timeStamp = this.getURLParams("timeStamp");
-      var nonceStr = this.getURLParams("nonceStr");
-      var packageValue = this.getURLParams("packageValue");
-      var paySign = this.getURLParams("paySign");
-      var money = this.getURLParams("money");
+           }
+        if (r != null) {
+            return unescape(r[2]);
+        }
+        return null;
+    
+    },
+    wxpaymoney(url) {
+      var appId = this.getURLParams("appid",url);
+
+      var timeStamp = this.getURLParams("timeStamp",url);
+      var nonceStr = this.getURLParams("nonceStr",url);
+      var packageValue = this.getURLParams("packageValue",url);
+      var paySign = this.getURLParams("paySign",url);
+      var money = this.getURLParams("money",url);
+     
       wx.config({
         debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
         appId: appId, // 必填，公众号的唯一标识
@@ -344,29 +391,74 @@ export default {
         paySign: paySign, // 支付签名
         success: function(res) {
           this.$toast("支付成功");
+           this.$router.push({path:'/buy',query:{type:1}})
           // 支付成功后的回调函数
         }
       });
     },
-
+    // 正式播放
+ canplaythroughFun(){
+   let that = this
+    this.$toast.clear()
+    let intsecond
+              intsecond = parseInt(that.audio.duration);
+      that.intsecond = intsecond;
+      let min = parseInt(intsecond / 60);
+      let second = intsecond % 60 < 10 ? "0" + intsecond % 60 : intsecond % 60;
+      that.alltime = min + ":" + second;
+      let step = Number(100 / intsecond).toFixed(3);
+      clearInterval(that.audioInterval);
+      that.audioInterval = setInterval(() => {
+        that.jishi++;
+        that.value = that.value + Number(step);
+      }, 1000);
+ } ,
+ loadeddataFun(){
+      this.$toast.loading({
+        message: "音频缓冲中...",
+        forbidClick: true,
+        duration: 30000
+      });
+ },
     /**
      * 开始播放
      * */
-    playAudio() {
+    playAudio(load) {
       this.audioPlayShow = false;
       this.audio = document.getElementById("audio");
-      let intsecond = parseInt(this.audio.duration);
-      this.intsecond = intsecond;
+      let intsecond 
+
+      let that = this
+      if(load == 1){
+      this.audio.load()
+ // 切换路径时
+              this.audio.oncanplay =function(){
+                
+        that.audio.play();
+        
+        }
+      }else{
+        
+
+             that.audio.play();
+                   intsecond = parseInt(that.audio.duration);
+
+      that.intsecond = intsecond;
       let min = parseInt(intsecond / 60);
       let second = intsecond % 60 < 10 ? "0" + intsecond % 60 : intsecond % 60;
-      this.alltime = min + ":" + second;
+      that.alltime = min + ":" + second;
       let step = Number(100 / intsecond).toFixed(3);
-      this.audioInterval = setInterval(() => {
-        this.jishi++;
-        this.value = this.value + Number(step);
+      clearInterval(that.audioInterval);
+      that.audioInterval = setInterval(() => {
+        that.jishi++;
+        that.value = that.value + Number(step);
       }, 1000);
-      this.audio.play();
+     
+         that.$toast.clear()
+      }
+      
     },
+
     /**
      * 暂停音频
      */
@@ -391,7 +483,7 @@ export default {
       this.$toast.loading({
         message: "音频加载中...",
         forbidClick: true,
-        duration: 700
+        duration: 6000
       });
 
       if (this.playstatus == 1) {
@@ -405,12 +497,15 @@ export default {
         // 随机播放
         this.cur = mathnum;
       }
+      this.trialurl = this.tempsongarr[this.cur].trialurl
       // 单曲循环
       this.jishi = 0;
       this.value = 0;
-      setTimeout(() => {
-        this.playAudio();
-      }, 600);
+      this.$nextTick(()=>{
+        this.playAudio(1);
+
+      })
+   
     },
     // 快退
     clickBefore() {
@@ -439,16 +534,21 @@ export default {
         this.value = this.value + Number(this.aftert * nowvalue);
       }
     },
-    clickme() {
+    clickme(i) {
+      if(i == 5){
+      this.$toast("购买后可评论");
+
+      }else{
       this.$toast("购买后可查看");
+
+      }
     }
   },
   mounted() {
-    let money = localStorage.getItem('money')
+    let money = localStorage.getItem('money') || 30
     if(money){
-      this.money = Number(money)
+      this.money = Number(money) || 30
     }
-  
     this.getYearInfo();
   }
 };
@@ -531,12 +631,12 @@ export default {
 .month_warp {
   transition: all 0.3s ease-in-out;
 
-  margin-top: 15px;
-  height: 34vh;
+  margin-top: 3px;
+  height: 33.5vh;
   overflow-y: auto;
 }
 .month_list {
-  margin-top: 22px;
+  margin-top: 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -571,13 +671,13 @@ export default {
   overflow-y: auto;
 }
 .dump {
-  height: 33vh;
+  height: 33.5vh;
   opacity: 1;
   transition: all 0.4s ease-in-out;
 }
 
 .jiemu_list {
-  margin-top: 22px;
+  margin-top: 20px;
   white-space: nowrap;
   display: flex;
 }
@@ -597,13 +697,13 @@ export default {
 
 /* 音频相关 */
 .audiobox {
-  padding: 13px 18px;
+  padding:4px 18px 8px;
   width: 100%;
   box-sizing: border-box;
   position: fixed;
+  background: #fff;
   bottom: 0;
   /* background: #eee; */
-  padding-top: 13.5px;
 }
 /* top */
 .audio_top {
@@ -694,5 +794,8 @@ export default {
 .current {
   background: darkblue;
   color: #fff;
+}
+.currentMonth{
+  color: #333;
 }
 </style>

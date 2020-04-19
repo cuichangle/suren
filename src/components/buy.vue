@@ -36,7 +36,7 @@
       <!-- 节目列表 -->
       <div :class="{'dump':monthTime,'heiyear1':showselectyear||showselectmonth}"  class="jiemu_warp " >
           <div @click="chonseaudio(index)" class="jiemu_list" v-for="(item,index ) in songarr" :key="index" >
-              <div v-if="cur==index" class="list_left" >正在播放：</div>
+              <div v-if="cur==index  && tempmonth == monthTime" class="list_left" >正在播放：</div>
             <div class="jiemu_title">{{item.title}}</div>
         </div>
        </div>
@@ -77,18 +77,18 @@
 
 
     <!-- 音频操作 -->
-    <div v-if="showaudio " class="audiobox animated fadeInUp">
-          <audio  :src="songarr[cur].completeurl"  id="audio" @ended="overAudio" >
-      <!-- <source
-     
+    <div v-if="showaudio" class="audiobox animated fadeInUp">
+          <audio preload @loadeddata ="loadeddataFun"   @canplaythrough ='canplaythroughFun' id="audio" @ended="overAudio" >
+          <source
+          :src="completeurl"
         type="audio/mp3"
-      /> -->
-    </audio>
+           />
+        </audio>
        <div class="audio_top">
-          <img @click="clickme" src="/static/img/song.png" class="top_icon1" alt="">
-          <img  @click="clickme" src="/static/img/tianjia.png" class="top_icon2" alt="">
-          <img   @click="clickme" src="/static/img/beizhu.png" class="top_icon3" alt="">
-          <img  @click="clickme" src="/static/img/righticon.png" class="top_icon4" alt="">
+          <img @click="clickme('honoredguest')" src="/static/img/song.png" class="top_icon1" alt="">
+          <img  @click="clickme('author')" src="/static/img/tianjia.png" class="top_icon2" alt="">
+          <img   @click="clickme('remark')" src="/static/img/beizhu.png" class="top_icon3" alt="">
+          <img  @click="clickme('emcee')" src="/static/img/righticon.png" class="top_icon4" alt="">
        </div>
        <div class="audio_center">
          <div class="cen_nowtime">{{playtime}}</div>
@@ -129,12 +129,17 @@
      <div class="submit" @click="addcomment">点击提交</div>
   </div>
 </van-action-sheet>
-
+<van-action-sheet v-model="showInfomation" :title="actionTitle">
+  <div class="action_content">
+     <div class="action_text">{{infotext}}</div>
+     <div class="fuzhi"  :data-clipboard-text="infotext" @click="copyText">一键复制</div>
+  </div>
+</van-action-sheet>
   </div>
 </template>
 <script>
 import { Slider, ActionSheet } from "vant";
-
+import wx from "weixin-js-sdk";
 export default {
   data() {
     return {
@@ -164,15 +169,19 @@ export default {
       playcount: 0, //播放时间，大于10s 即请求接口
       twointerVal: null, //第二个计时器
       hei: "",
+      showInfomation:false,
+      infotext:'',
       note: {
         backgroundImage:
           "url(" + require("../../static/img/jindutiao.png") + ") ",
         backgroundRepeat: "no-repeat",
         backgroundSize: "100% 100%"
       },
-
-      // 上面音乐有关
-
+tempmonth:'',//当前播放
+tempsongarr:[],
+     
+actionTitle:'',//点击不同类型显示action文字提示切换
+completeurl:'',//音频路径
       year: -1, //年份索引
       showaudio: false, //是否显示音频控件
       showselectyear: false, //是否显示年份下拉框
@@ -250,6 +259,30 @@ export default {
       this.showselectmonth = false;
       this.getJiemuInfo();
     },
+    // 正式播放
+ canplaythroughFun(){
+   let that = this
+    this.$toast.clear()
+    let intsecond
+              intsecond = parseInt(that.audio.duration);
+      that.intsecond = intsecond;
+      let min = parseInt(intsecond / 60);
+      let second = intsecond % 60 < 10 ? "0" + intsecond % 60 : intsecond % 60;
+      that.alltime = min + ":" + second;
+      let step = Number(100 / intsecond).toFixed(3);
+      clearInterval(that.audioInterval);
+      that.audioInterval = setInterval(() => {
+        that.jishi++;
+        that.value = that.value + Number(step);
+      }, 1000);
+ } ,
+ loadeddataFun(){
+      this.$toast.loading({
+        message: "音频缓冲中...",
+        forbidClick: true,
+        duration: 6000
+      });
+ },
     //是否点赞
     changeLike(id,index) {
       if( this.commentlist[index].isPraose){
@@ -272,6 +305,17 @@ export default {
         
       });
     },
+    // 复制文字
+    copyText(){
+      let that = this
+　let clipboardObj = new this.clipboard(".fuzhi");
+　　　　　　　　clipboardObj .on('success', function () {
+　　　　　　　　　　that.$toast("复制成功")
+　　　　　　　　});
+　　　　　　　　clipboardObj .on('error', function () {
+　　　　　　　　　　that.$toast("复制失败")
+　　　　　　　　});
+    },
     // 播放进度
     changevalue(v) {
       this.pauseAudio();
@@ -279,6 +323,7 @@ export default {
     },
     // 拖动结束
     playaudioagain() {
+ 
       this.audio.currentTime = this.jishi;
       this.playAudio();
     },
@@ -289,6 +334,11 @@ export default {
       if (this.cur == i) {
         return;
       }
+        this.$toast.loading({
+        message: "音频加载中...",
+        forbidClick: true,
+        duration: 6000
+      });
       this.cur = i;
       this.pageSize = 1
       this.showaudio = true;
@@ -298,20 +348,17 @@ export default {
         this.value = 0;
       }
       let that = this;
-     
-      this.$nextTick(() => {
-        let audio = document.getElementById("audio");
+      that.completeurl = this.songarr[i].completeurl
+             this.tempmonth = this.monthTime
+      this.tempsongarr = this.songarr
 
-        audio.addEventListener("canplay", function() {
-          //监听audio是否加载完毕，如果加载完毕，则读取audio播放时间
-          that.playAudio();
-          that.addcount(0);
-        });
+      this.$nextTick(() => {
+        
+           that.playcount=0
+           that.playAudio(1);
       });
 
-      // this.timerout = setTimeout(() => {
-      //   this.playAudio();
-      // }, 800);
+    
       this.getcomment();
     },
     //  定时器处理函数
@@ -380,6 +427,7 @@ export default {
       };
       this.$request("comment/saveShowComment", data).then(res => {
         this.showinput = false;
+        this.$toast('评论成功，需审核')
         this.getcomment();
       });
     },
@@ -448,23 +496,43 @@ export default {
     /**
      * 开始播放
      * */
-    playAudio() {
+    playAudio(load) {
       this.audioPlayShow = false;
       this.audio = document.getElementById("audio");
+      
+        let intsecond
+        let that = this
+        if(load ==1){
+          that.audio.load()
+this.audio.oncanplay =function(){
+        that.audio.play();
+  
+      that.addcount(this.playcount);
+    
+        }
 
-      let intsecond = parseInt(this.audio.duration);
-      this.intsecond = intsecond;
+
+        }else{
+        that.audio.play();
+       intsecond = parseInt(that.audio.duration);
+      that.intsecond = intsecond;
       let min = parseInt(intsecond / 60);
       let second = intsecond % 60 < 10 ? "0" + intsecond % 60 : intsecond % 60;
-      this.alltime = min + ":" + second;
+      that.alltime = min + ":" + second;
       let step = Number(100 / intsecond).toFixed(3);
-      clearInterval(this.audioInterval);
-      this.audioInterval = setInterval(() => {
-        this.jishi++;
-        this.value = this.value + Number(step);
+      clearInterval(that.audioInterval);
+      that.audioInterval = setInterval(() => {
+        that.jishi++;
+        that.value = that.value + Number(step);
       }, 1000);
-      this.audio.play();
-      this.addcount(this.playcount);
+      that.addcount(this.playcount);
+     
+        }
+          
+        
+      
+  
+
     },
     /**
      * 暂停音频
@@ -492,9 +560,9 @@ export default {
       this.$toast.loading({
         message: "音频加载中...",
         forbidClick: true,
-        duration: 1000
+        duration: 6000
       });
-      console.log(mathnum, this.playstatus, len);
+    
 
       if (this.playstatus == 1) {
         // 顺序播放
@@ -510,9 +578,13 @@ export default {
       // 单曲循环
       this.jishi = 0;
       this.value = 0;
-      setTimeout(() => {
-        this.playAudio();
-      }, 600);
+      this.completeurl =  this.tempsongarr[this.cur].completeurl
+  
+      this.$nextTick(()=>{
+           this.playAudio(1);
+           
+      })
+  
       console.log("当前播放", this.cur);
     },
     // 快退
@@ -542,8 +614,22 @@ export default {
         this.value = this.value + Number(this.aftert * nowvalue);
       }
     },
-    clickme() {
-      this.$toast("购买后可查看");
+    clickme(val) {
+     if(val ==='honoredguest'){
+       this.actionTitle = '嘉宾信息'
+     }else if(val === 'author' ){
+       this.actionTitle = '制作人信息'
+
+     }else if(val === 'remark' ){
+       this.actionTitle = '备注'
+
+     }else if(val === 'emcee' ){
+       this.actionTitle = '主持人信息'
+
+     }
+      this.showInfomation = true
+      this.infotext = this.songarr[this.cur][val]
+
     },
     //  获得节目信息
     getalllist() {
@@ -567,11 +653,17 @@ export default {
         this.yearId = res.response.yearInfo.yearId;
         this.monthTime = res.response.monthInfo.monthTime;
       });
-    }
+    },
+  
   },
   mounted() {
     // this.getYearInfo()
+    if(this.$route.query.type){
+      this.gotype = this.$route.query.type
+    }
     this.getalllist();
+    
+  
   }
 };
 </script>
@@ -640,7 +732,7 @@ export default {
   overflow-y: auto;
 }
 .dump {
-  height: 33vh;
+  height: 33.5vh;
   opacity: 1;
   transition: all 0.4s ease-in-out;
 }
@@ -651,7 +743,7 @@ export default {
 }
 .jiemu_list {
   align-items: center;
-  margin-top: 26px;
+  margin-top: 22px;
   white-space: nowrap;
   display: flex;
 }
@@ -692,12 +784,12 @@ export default {
 .month_warp {
   transition: all 0.3s ease-in-out;
 
-  margin-top: 8px;
+  margin-top: 4px;
   height: 37.4vh;
   overflow-y: auto;
 }
 .month_list {
-  margin-top: 18px;
+  margin-top: 13px;
 }
 
 .com_top {
@@ -755,11 +847,13 @@ export default {
 
 .action_content {
   box-sizing: border-box;
-  padding: 40px 30px;
+  padding: 10px 16px;
   text-align: center;
 }
 .action_content input {
   font-size: 12px;
+  
+  border: 0;
   width: 84%;
   border: 1px solid #ebde95;
   padding: 8px 8px;
@@ -780,12 +874,13 @@ export default {
 
 /* 音频相关 */
 .audiobox {
-  padding: 13px 18px;
+  padding:4px 18px 8px;
+    background: #fff;
+
   width: 100%;
   box-sizing: border-box;
   position: fixed;
   bottom: 0;
-  padding-top: 13.5px;
 }
 /* top */
 .audio_top {
@@ -883,6 +978,18 @@ export default {
   color: #959595;
   text-align: center;
 }
+.fuzhi{
+  padding: 3px 6px;
+  display: inline-block;
+  font-size: 12px;
+  color: #959595;
+  border: 1px solid #d6c250;
+  margin-top: 14px;
+}
+.action_text{
+  text-align: left;
+  color: #333333;
+  font-size: 14px;
 
-
+}
 </style>

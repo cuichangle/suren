@@ -1,7 +1,11 @@
 <template>
-  <div v-html="infoHtml" class="page">
+<div class="page">
+
+<div id="editor" v-html="infoHtml" >
    
   </div>
+</div>
+  
 </template>
 <script>
 export default {
@@ -16,10 +20,11 @@ export default {
       this.$toast.loading({
   message: '努力加载中...',
   forbidClick: true,
-  duration:500
+  duration:1000
 });
       let openid = this.$store.state.openid
       this.$request('index/queryRichTextInfo',{openid:openid,type:this.type}).then(res=>{
+        this.$toast.clear()
         this.infoHtml = res.response
       })
     }
@@ -30,5 +35,11 @@ export default {
 };
 </script>
 <style scoped>
+.page{
+  box-sizing: border-box;
+  overflow-x: hidden;
+  width: 100vw;
+  padding: 20px 16px;
+}
 
 </style>

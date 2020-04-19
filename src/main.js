@@ -49,6 +49,8 @@ Vue.config.productionTip = false
 window.addEventListener('popstate', function (e) {
   router.isBack = true
 },false)
+　import clipboard from 'clipboard';
+　　　　　　Vue.prototype.clipboard = clipboard;
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

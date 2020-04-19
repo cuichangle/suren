@@ -1,5 +1,5 @@
 <template>
-  <div :style="note" class="page">
+  <div :style="note" id="homepage" class="page">
     <div class="content">
        <div class="title">{{indexTop.radioTitle}}</div>
        <div class="cost">
@@ -27,7 +27,7 @@
      </div>
      <div class="footer">
 
-      <div class="count">{{userShopInfo.noShopMonthNum}}</div>
+      <div v-if="userShopInfo.noShopMonthNum" class="count">{{userShopInfo.noShopMonthNum}}</div>
 
      </div>
   
@@ -73,15 +73,20 @@ export default {
       this.$router.push({path:'/tingzhong'})
 
     },
-    // 获得首页信息
-    getHomeInfo(){
+    created(){
       this.$toast.loading({
   message: '努力加载中...',
   forbidClick: true,
-  duration:500
+  duration:1000
 });
+    },
+    // 获得首页信息
+    getHomeInfo(){
+
       let openid = this.$store.state.openid
+      console.log(openid,'请求后台的openid')
       this.$request('index/info',{openid:openid}).then(res=>{
+        this.$toast.clear()
         this.indexTop = res.response.indexTop
         this.userShopInfo = res.response.userShopInfo
         localStorage.setItem('money',res.response.priceInfo)
@@ -91,12 +96,19 @@ export default {
         }
       })
     }
-    
+  
   },
   mounted() {
-    console.log('gitceshi')
+ 
+      var dom = document.getElementById('homepage')
+     dom.addEventListener('touchmove', function (e) {
+        e.preventDefault() // 阻止默认的处理方式(阻止下拉滑动的效果)
+    }, {passive: false}) // passive 参数不能省略，用来兼容ios和android
+
     let id = this.getUrlParam('openid')
+    console.log(id,'路径拿到的openid')
     if(id){
+        localStorage.setItem('openid',id)
         this.$store.commit('changeOpenid',id)
     }else{
       // window.location.href = 'http://surenguangbo.com/suren';
@@ -105,6 +117,11 @@ export default {
  
 
   },
+  beforeDestroy(){
+    //  document.body.removeEventListener('touchmove',function (e) {
+       
+    // },false)
+  }
 };
 </script>
 <style scoped>

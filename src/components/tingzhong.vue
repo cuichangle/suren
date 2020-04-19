@@ -1,7 +1,11 @@
 <template>
-  <div v-html="infoHtml" class="page">
+<div class="page">
+<div v-html="infoHtml" >
    
   </div>
+
+</div>
+  
 </template>
 <script>
 export default {
@@ -30,5 +34,16 @@ export default {
 };
 </script>
 <style scoped>
+.page{
+  box-sizing: border-box;
+  overflow-x: hidden;
+  padding: 20px 16px;
+}
+</style>
+<style >
+img{
+    max-width: 100% !important;
+    height: auto !important;
+}
 
 </style>
