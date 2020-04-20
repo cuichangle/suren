@@ -344,25 +344,9 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
         this.$toast("切换至循环播放");
       }
     },
+	
     getURLParams(key,url) {
-           var reg = new RegExp("(^|&)" + key + "=([^&]*)(&|$)", "i");
-         
-           var r
-           if(url){
-             
-             if(url.indexOf('nobuy')>-1){
-              
-              url = url.split('nobuy')[1]
-             }
-        r =url.substr(1).match(reg);
-           }else{
-         r = window.location.search.substr(1).match(reg);
-
-           }
-        if (r != null) {
-            return unescape(r[2]);
-        }
-        return null;
+             return decodeURIComponent((new RegExp('[?|&]' + key + '=' + '([^&;]+?)(&|#|;|$)').exec(url) || [, ""])[1].replace(/\+/g, '%20')) || null
     
     },
     wxpaymoney(url) {
@@ -717,11 +701,11 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
 }
 .top_icon2 {
   width: 24px;
-  height: 24.5px;
+  height: 24px;
 }
 .top_icon3 {
   width: 21.5px;
-  height: 24.5px;
+  height: 24px;
 }
 .top_icon4 {
   width: 22px;
@@ -729,7 +713,7 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
 }
 .top_icon3 {
   width: 22px;
-  height: 23.5px;
+  height: 23px;
 }
 /* center */
 .audio_center {

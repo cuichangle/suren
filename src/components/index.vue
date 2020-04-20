@@ -27,7 +27,7 @@
      </div>
      <div class="footer">
 
-      <div v-if="userShopInfo.noShopMonthNum" class="count">{{userShopInfo.noShopMonthNum}}</div>
+      <div v-if="userShopInfo" class="count">{{userShopInfo.noShopMonthNum}}</div>
 
      </div>
   
@@ -50,15 +50,11 @@ export default {
     };
   },
   methods: {
-    // 获得后端返回的路径地址，取oppenid
-    getUrlParam(key){
-       var reg = new RegExp("(^|&)" + key + "=([^&]*)(&|$)", "i");
-        var r = window.location.search.substr(1).match(reg);
-        if (r != null) {
-            return unescape(r[2]);
-        }
-        return null;
-    },
+  
+ 
+	getUrlKey (name) {
+			        return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.href) || [, ""])[1].replace(/\+/g, '%20')) || null
+			    },
     gobuy(){
       this.$router.push({path:'/buy'})
     },
@@ -105,8 +101,10 @@ export default {
         e.preventDefault() // 阻止默认的处理方式(阻止下拉滑动的效果)
     }, {passive: false}) // passive 参数不能省略，用来兼容ios和android
 
-    let id = this.getUrlParam('openid')
+    let id = this.getUrlKey('openid')
+	
     console.log(id,'路径拿到的openid')
+
     if(id){
         localStorage.setItem('openid',id)
         this.$store.commit('changeOpenid',id)

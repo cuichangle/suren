@@ -41,7 +41,7 @@ export default {
 }
 </style>
 <style >
-img{
+.page img{
     max-width: 100% !important;
     height: auto !important;
 }
