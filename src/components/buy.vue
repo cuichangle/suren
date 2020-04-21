@@ -130,7 +130,7 @@
   </div>
 </van-action-sheet>
 <van-action-sheet v-model="showInfomation" :title="actionTitle">
-  <div class="action_content">
+  <div class="action_content action_content1">
      <div class="action_text">{{infotext}}</div>
      <div class="fuzhi"  :data-clipboard-text="infotext" @click="copyText">一键复制</div>
   </div>
@@ -310,6 +310,7 @@ completeurl:'',//音频路径
       let that = this
 　let clipboardObj = new this.clipboard(".fuzhi");
 　　　　　　　　clipboardObj .on('success', function () {
+that.showInfomation = false
 　　　　　　　　　　that.$toast("复制成功")
 　　　　　　　　});
 　　　　　　　　clipboardObj .on('error', function () {
@@ -858,6 +859,9 @@ this.audio.oncanplay =function(){
   border: 1px solid #ebde95;
   padding: 8px 8px;
   border-radius: 6px;
+}
+.action_content1{
+padding-bottom:20px;
 }
 .submit {
   width: 55%;
