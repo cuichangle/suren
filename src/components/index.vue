@@ -25,9 +25,9 @@
           <div @click="golanmu" class="foot_view"> </div>
           <div @click="gotingzhong" class="foot_view"> </div>
      </div>
-     <div class="footer">
+     <div class="footer" v-if="userShopInfo">
 
-      <div v-if="userShopInfo" class="count">{{userShopInfo.noShopMonthNum}}</div>
+      <div  class="count">{{userShopInfo.noShopMonthNum}}</div>
 
      </div>
   

@@ -898,11 +898,11 @@ padding-bottom:20px;
 }
 .top_icon2 {
   width: 24px;
-  height: 24.5px;
+  height: 24px;
 }
 .top_icon3 {
-  width: 21.5px;
-  height: 24.5px;
+  width: 21px;
+  height: 24px;
 }
 .top_icon4 {
   width: 22px;
@@ -910,7 +910,7 @@ padding-bottom:20px;
 }
 .top_icon3 {
   width: 22px;
-  height: 23.5px;
+  height: 23px;
 }
 /* center */
 .audio_center {

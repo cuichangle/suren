@@ -704,7 +704,7 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
   height: 24px;
 }
 .top_icon3 {
-  width: 21.5px;
+  width: 21px;
   height: 24px;
 }
 .top_icon4 {

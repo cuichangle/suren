@@ -1,5 +1,5 @@
 <template>
-<div class="page">
+<div class="page ueditor">
 <div v-html="infoHtml" >
    
   </div>
@@ -41,9 +41,9 @@ export default {
 }
 </style>
 <style >
-.page img{
+.ueditor img{
     max-width: 100% !important;
-    height: auto !important;
+   
 }
 
 </style>
