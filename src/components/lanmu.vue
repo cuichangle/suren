@@ -1,5 +1,7 @@
 <template>
 <div class="page ueditor">
+  <div v-wechat-title='$route.meta.title'></div>
+  
 
 <div id="editor" v-html="infoHtml" >
    

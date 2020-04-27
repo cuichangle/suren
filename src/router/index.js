@@ -15,21 +15,33 @@ export default new Router({
       path: '/nobuy',
       name: 'nobuy',
       component: ()=>import('@/components/nobuy'),
+      meta:{
+        title:'您未购买过的'
+      }
     },
     {
       path: '/buy',
       name: 'buy',
       component: ()=>import('@/components/buy'),
+      meta:{
+        title:'您已购买过的'
+      }
     },
     {
       path: '/lanmu',
       name: 'lanmu',
       component: ()=>import('@/components/lanmu'),
+      meta:{
+        title:'全部栏目介绍'
+      }
     },
     {
       path: '/tingzhong',
       name: 'tingzhong',
       component: ()=>import('@/components/tingzhong'),
+      meta:{
+        title:'如何加入听众群'
+      }
     },
  
   

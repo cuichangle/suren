@@ -40,6 +40,7 @@ export default {
  .Router {
       position: relative;
       height: 100vh;
+      background: #EDEDED;
       transition: all .4s ease;
       
     }

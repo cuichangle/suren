@@ -23,7 +23,10 @@ Vue.use(Slider)
 
 
 
+import VueWechatTitle from 'vue-wechat-title'  //引入
 
+Vue.use(VueWechatTitle)   
+    
 Vue.use(Swipe)
 Vue.prototype.$toast = Toast
 

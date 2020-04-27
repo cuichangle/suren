@@ -1,5 +1,7 @@
 <template>
-  <div :style="note" id="homepage" class="page">
+  <div  id="homepage" class="page">
+    <div :style="note" class="page_top">
+
     <div class="content">
        <div class="title">{{indexTop.radioTitle}}</div>
        <div class="cost">
@@ -17,13 +19,25 @@
        </div>
     </div>
    
+    </div>
         
    <div class="footer_box">
          <div class="foot_view_warp">
-           <div @click="gobuy" class="foot_view">  </div>
-          <div @click="gonobuy" class="foot_view"> </div>
-          <div @click="golanmu" class="foot_view"> </div>
-          <div @click="gotingzhong" class="foot_view"> </div>
+           <div @click="gobuy" :style="{'background':colorinfo.one}" class="foot_view"> 
+              <img src="static/img/havebuy.png" alt="">
+              </div>
+          <div @click="gonobuy" :style="{'background':colorinfo.two}" class="foot_view">
+              <img src="static/img/h_nobuy.png" alt="">
+            
+             </div>
+          <div @click="golanmu" :style="{'background':colorinfo.three}" class="foot_view">
+              <img src="static/img/h_lanmu.png" alt="">
+            
+             </div>
+          <div @click="gotingzhong" :style="{'background':colorinfo.four}" class="foot_view">
+              <img src="static/img/h_tingzhong.png" alt="">
+            
+             </div>
      </div>
      <div class="footer" v-if="userShopInfo">
 
@@ -41,6 +55,13 @@ export default {
     return {
       indexTop:{},
       userShopInfo:{},
+      colorinfo:{
+      
+         one: 'rgb(223, 190, 84)',
+  two:' rgb(176, 218, 61)',
+  three:' rgb(123, 160, 22)',
+  four: 'rgb(47, 199, 179)'
+      },
 
       note: {
         backgroundImage: "url(" + require("../../static/img/home2.jpg") + ") ",
@@ -123,13 +144,21 @@ export default {
 };
 </script>
 <style scoped>
+
 .content {
   padding: 126px 14px 0 ;
   text-align: center;
   color: #fff;
+
+  
+  
+  
 }
 .title {
   font-size: 14px;
+}
+.page_top{
+  height: 89.7vh;
 }
 .cost {
   font-size: 10px;
@@ -142,7 +171,8 @@ export default {
 }
 .explain,
 .list_warp {
-  color: rgb(214, 214, 214);
+  /* color: rgb(214, 214, 214); */
+  color:#fff;
   font-weight: 400;
   font-size: 9px;
 }
@@ -174,11 +204,22 @@ export default {
 }
 .foot_view_warp {
   display: flex;
-    height: 10vh;
+    height: 9.5vh;
+    position: fixed;
+    bottom: 0;
+
   width: 100vw;
   justify-content: space-between;
 }
 .foot_view {
-  width: 23%;
+  background: darkblue;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 23vw;
+}
+.foot_view img{
+  width: 10vw;
+  height: 10vw;
 }
 </style>

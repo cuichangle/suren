@@ -1,9 +1,11 @@
 <template>
-  <div class="page">
+  <div @click="allclose" class="page">
+  <div v-wechat-title='$route.meta.title'></div>
+    
     <!-- 顶部 -->
     <div class="main">
         <div class="m_top">
-          <div @click="clickselect" :style="selectData" class="select">
+          <div @click.stop="clickselect" :style="selectData" class="select">
              <div v-if="yearName">已选{{yearName}}</div> 
              <div v-else>请先选择年份</div>
           </div>
@@ -25,8 +27,8 @@
         <div v-if="monthlist.length" :class="{'heiyear1':showselectyear}" class="month_warp">
            <div class="month_list" v-for="(item,index ) in monthlist" :key="index" >
               <div class="list_left">{{item.monthName}}</div>
-              <div @click="chonsemonth(item.monthTime)" :class="{'currentMonth':item.monthTime == tempmonth}" class="list_cen">点击浏览本月全部节目</div>
-              <div @click="selectbuy(index)" class="list_right">
+              <div @click.stop="chonsemonth(item.monthTime)" :class="{'currentMonth':item.monthTime == tempmonth}" class="list_cen">点击浏览本月全部节目</div>
+              <div @click.stop="selectbuy(index)" class="list_right">
                   <img v-if="item.flag" src="/static/img/chonse.png" alt="">
                   <img v-else src="/static/img/nochonse.png" alt="">
               </div>
@@ -190,6 +192,11 @@ trialurl:'',
   },
 
   methods: {
+       allclose(){
+      this.showselectmonth = false;
+        this.showselectyear = false;
+
+    },
     // 点击下拉框
     clickselect() {
       this.showselectyear = !this.showselectyear;
@@ -384,6 +391,8 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
  canplaythroughFun(){
    let that = this
     this.$toast.clear()
+    this.$toast('您正在收听的为试听版')
+    
     let intsecond
               intsecond = parseInt(that.audio.duration);
       that.intsecond = intsecond;
@@ -499,6 +508,8 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
       let nowvalue = (100 / this.intsecond).toFixed(3);
       if (this.jishi > this.befort) {
         this.jishi = this.jishi - this.befort;
+        this.audio.currentTime = this.jishi;
+        
         this.value = this.value - this.befort * Number(nowvalue);
       } else {
         this.jishi = 0;
@@ -681,11 +692,11 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
 
 /* 音频相关 */
 .audiobox {
-  padding:4px 18px 8px;
+  padding:6px 18px 14px;
   width: 100%;
   box-sizing: border-box;
   position: fixed;
-  background: #fff;
+  background: #EDEDED;
   bottom: 0;
   /* background: #eee; */
 }
@@ -717,7 +728,7 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
 }
 /* center */
 .audio_center {
-  margin: 15px 0 22px;
+  margin: 15px 0 13px;
   display: flex;
   justify-content: space-between;
   align-items: center;

@@ -1,13 +1,14 @@
 <template>
-  <div class="page">
+  <div @click='allclose' class="page">
+  <div v-wechat-title='$route.meta.title'></div>
     <!-- 顶部 -->
     <div class="main">
         <div class="m_top">
-          <div @click="clickselect" :style="selectData" class="select">
+          <div @click.stop="clickselect" :style="selectData" class="select">
              <div v-if="yearName">已选{{yearName}}</div> 
              <div v-else>请先选择年份</div>
           </div>
-          <div @click="clickselectMonth" :style="selectData" class="select">
+          <div @click.stop="clickselectMonth" :style="selectData" class="select">
              <div v-if="monthName">已选{{monthName}}</div> 
              <div v-else>请先选择月份</div>
           </div>
@@ -15,7 +16,7 @@
         <!-- 年份选择框 -->
         <div  class="xiala" :class="{'heiyear':showselectyear||showselectmonth }"  >
           <div class="select scrollyear" :class="{'heiyear':showselectyear }">
-             <div  @click="changeyear(item.yearName,item.yearId)" class="s_list" v-for="(item,index) in yearlist" :key="index">
+             <div  @click.stop="changeyear(item.yearName,item.yearId)" class="s_list" v-for="(item,index) in yearlist" :key="index">
                 <div class="s_square"> <span class="s_dark" v-if="yearName == item.yearName"></span> </div>
                 <div class="s_title">{{item.yearName}}</div>
              </div>
@@ -23,7 +24,7 @@
 
           <div class="select scrollyear" :class="{'heiyear_month':showselectmonth }">
               
-  <div @click="chonsemonth(item.monthName,item.monthTime)" class="s_list" v-for="(item,index) in monthlist" :key="index">
+  <div @click.stop="chonsemonth(item.monthName,item.monthTime)" class="s_list" v-for="(item,index) in monthlist" :key="index">
                    <div class="s_square"> <span class="s_dark" v-if="monthName == item.monthName"></span> </div>
                    <div class="s_title">{{item.monthName}}</div>
               </div>
@@ -57,7 +58,7 @@
                 </div>
            </div>
          </div>
-         <div class="nocoment" v-else>暂无评论~</div>
+         <div class="nocoment" v-if="!commentlist.length && showaudio">暂无评论~</div>
       
     </div> 
 
@@ -85,10 +86,10 @@
            />
         </audio>
        <div class="audio_top">
-          <img @click="clickme('honoredguest')" src="/static/img/song.png" class="top_icon1" alt="">
-          <img  @click="clickme('author')" src="/static/img/tianjia.png" class="top_icon2" alt="">
+          <img @click="clickme('emcee')" src="/static/img/song.png" class="top_icon1" alt="">
+          <img  @click="clickme('honoredguest')" src="/static/img/tianjia.png" class="top_icon2" alt="">
           <img   @click="clickme('remark')" src="/static/img/beizhu.png" class="top_icon3" alt="">
-          <img  @click="clickme('emcee')" src="/static/img/righticon.png" class="top_icon4" alt="">
+          <img  @click="clickme('author')" src="/static/img/righticon.png" class="top_icon4" alt="">
        </div>
        <div class="audio_center">
          <div class="cen_nowtime">{{playtime}}</div>
@@ -125,7 +126,7 @@
     </div>
 <van-action-sheet v-model="showinput" title="评论">
   <div class="action_content">
-     <input placeholder="请输入评论内容" @blur="onBlurInput" v-model="comment" type="text">
+     <input id="input" placeholder="请输入评论内容 200字" @blur="onBlurInput" v-model="comment" type="text">
      <div class="submit" @click="addcomment">点击提交</div>
   </div>
 </van-action-sheet>
@@ -215,6 +216,11 @@ completeurl:'',//音频路径
   },
 
   methods: {
+    allclose(){
+      this.showselectmonth = false;
+        this.showselectyear = false;
+
+    },
     // 点击下拉框
     clickselect() {
       this.showselectyear = !this.showselectyear;
@@ -421,6 +427,10 @@ that.showInfomation = false
     addcomment() {
       let openid = this.$store.state.openid;
       let showId = this.songarr[this.cur].id;
+      if(!this.comment){
+        this.$toast('请输入评论内容')
+        return
+      }
       let data = {
         openid,
         showId,
@@ -428,13 +438,18 @@ that.showInfomation = false
       };
       this.$request("comment/saveShowComment", data).then(res => {
         this.showinput = false;
-        this.$toast('评论成功，需审核')
+        this.$toast('评论已提交审核')
         this.getcomment();
       });
     },
     // 显示提示框
     clickIpticon() {
       this.showinput = true;
+      this.$nextTick(()=>{
+ let int = document.getElementById('input')
+    int.focus()
+      })
+   
     },
     /**
      * 切换播放状态
@@ -596,6 +611,8 @@ this.audio.oncanplay =function(){
       let nowvalue = (100 / this.intsecond).toFixed(3);
       if (this.jishi > this.befort) {
         this.jishi = this.jishi - this.befort;
+        this.audio.currentTime = this.jishi;
+        
         this.value = this.value - this.befort * Number(nowvalue);
       } else {
         this.jishi = 0;
@@ -831,13 +848,14 @@ this.audio.oncanplay =function(){
   margin-right: 9px;
 }
 .grade{
-  font-size: 15px;
+  font-size: 14px;
   color: #333;
   
-  font-weight: 600;
 }
 .creattime {
   font-size: 8px;
+  display: inline-block;
+ margin-top: 2px;
   color: rgb(107, 107, 107);
 }
 .com_content {
@@ -856,7 +874,7 @@ this.audio.oncanplay =function(){
   
   border: 0;
   width: 84%;
-  border: 1px solid #ebde95;
+  border: 1px solid #666;
   padding: 8px 8px;
   border-radius: 6px;
 }
@@ -868,7 +886,7 @@ padding-bottom:20px;
 
   margin: 20px auto;
   height: 30px;
-  background: linear-gradient(to right, #a39b6f 0%, #d1d425 100%);
+background: #666;
   color: #fff;
   text-align: center;
   line-height: 30px;
@@ -878,9 +896,9 @@ padding-bottom:20px;
 
 /* 音频相关 */
 .audiobox {
-  padding:4px 18px 8px;
-    background: #fff;
-
+  padding:8px 18px 10px;
+    background: #EDEDED;
+     
   width: 100%;
   box-sizing: border-box;
   position: fixed;
@@ -914,7 +932,7 @@ padding-bottom:20px;
 }
 /* center */
 .audio_center {
-  margin: 15px 0 22px;
+  margin: 15px 0 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -939,6 +957,7 @@ padding-bottom:20px;
   height: 13px;
 }
 .audio_bottom {
+
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -987,11 +1006,13 @@ padding-bottom:20px;
   display: inline-block;
   font-size: 12px;
   color: #959595;
-  border: 1px solid #d6c250;
+  border: 1px solid #666;
   margin-top: 14px;
 }
 .action_text{
   text-align: left;
+  max-height: 430px;
+  overflow-y: auto;
   color: #333333;
   font-size: 14px;
 
