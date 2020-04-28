@@ -18,16 +18,16 @@
         <!-- 年份选择框 -->
         <div  class="xiala" :class="{'heiyear':showselectyear}">
             <div @click="changeyear(item.yearId,item.yearName)" class="s_list" v-for="(item,index) in yearlist" :key="index">
-                <div class="s_square"> <span class="s_dark" v-if="year == index"></span> </div>
+                <div class="s_square"> <span class="s_dark" v-if="yearName == item.yearName"></span> </div>
                 <div class="s_title">{{item.yearName}}</div>
             </div>
         </div>
 
         <!-- 显示对应月份 -->
-        <div v-if="monthlist.length" :class="{'heiyear1':showselectyear}" class="month_warp">
+        <div  v-if="monthlist.length" :class="{'heiyear1':showselectyear}" class="month_warp">
            <div class="month_list" v-for="(item,index ) in monthlist" :key="index" >
               <div class="list_left">{{item.monthName}}</div>
-              <div @click.stop="chonsemonth(item.monthTime)" :class="{'currentMonth':item.monthTime == tempmonth}" class="list_cen">点击浏览本月全部节目</div>
+              <div @click="chonsemonth(item.monthTime)" :class="{'currentMonth':item.monthTime == tempmonth}" class="list_cen">点击浏览本月全部节目</div>
               <div @click.stop="selectbuy(index)" class="list_right">
                   <img v-if="item.flag" src="/static/img/chonse.png" alt="">
                   <img v-else src="/static/img/nochonse.png" alt="">
@@ -193,6 +193,7 @@ trialurl:'',
 
   methods: {
        allclose(){
+       
       this.showselectmonth = false;
         this.showselectyear = false;
 
@@ -621,7 +622,7 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
   border-radius: 50%;
   width: 8px;
   height: 8px;
-  background: #101010;
+  background: #666;
 }
 .month_warp {
   transition: all 0.3s ease-in-out;

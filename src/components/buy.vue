@@ -46,8 +46,11 @@
            <div class="month_list" v-for="(item,index ) in commentlist" :key="index" >
                 <div class="com_top">
                     <img :src="item.photo" class="avatar" alt="">
+                    <div class="creattime_box">
                     <div class="nickname">{{item.username}} <span class="grade">{{item.grade}}</span></div>
                     <div class="creattime">{{item.createTime}}</div>
+
+                    </div>
                     <van-icon  @click="changeLike(item.id,index)" class="like_icon" :class="{'islike':item.isPraose}"  size="20" name="good-job-o" />
                     <span class="dianzan " :class="{'islike':item.isPraose}">{{item.praiseNum}}点赞</span>
                 </div>
@@ -126,14 +129,14 @@
     </div>
 <van-action-sheet v-model="showinput" title="评论">
   <div class="action_content">
-     <input id="input" placeholder="请输入评论内容 200字" @blur="onBlurInput" v-model="comment" type="text">
+     <input id="input"  v-on:input="cancelLen" placeholder="请输入评论内容 200字" @blur="onBlurInput" v-model="comment" type="text">
      <div class="submit" @click="addcomment">点击提交</div>
   </div>
 </van-action-sheet>
 <van-action-sheet v-model="showInfomation" :title="actionTitle">
   <div class="action_content action_content1">
      <div class="action_text">{{infotext}}</div>
-     <div class="fuzhi"  :data-clipboard-text="infotext" @click="copyText">一键复制</div>
+     <!-- <div class="fuzhi"  :data-clipboard-text="infotext" @click="copyText">一键复制</div> -->
   </div>
 </van-action-sheet>
   </div>
@@ -235,6 +238,11 @@ completeurl:'',//音频路径
         this.showselectmonth = !this.showselectmonth;
       } else {
         this.$toast("请先选择年份");
+      }
+    },
+    cancelLen(){
+      if(this.comment.length>200){
+        this.$toast('内容已超过200字')
       }
     },
     scrollGet(e) {
@@ -347,7 +355,7 @@ that.showInfomation = false
         duration: 6000
       });
       this.cur = i;
-      this.pageSize = 1
+      this.pageNum =1 
       this.showaudio = true;
       if (this.audio) {
         this.pauseAudio();
@@ -431,6 +439,10 @@ that.showInfomation = false
         this.$toast('请输入评论内容')
         return
       }
+        if(this.comment.length>200){
+        this.$toast('评论内容超过200字限制')
+        return
+      }
       let data = {
         openid,
         showId,
@@ -445,6 +457,7 @@ that.showInfomation = false
     // 显示提示框
     clickIpticon() {
       this.showinput = true;
+      this.comment = ''
       this.$nextTick(()=>{
  let int = document.getElementById('input')
     int.focus()
@@ -634,15 +647,15 @@ this.audio.oncanplay =function(){
     },
     clickme(val) {
      if(val ==='honoredguest'){
-       this.actionTitle = '嘉宾信息'
+       this.actionTitle = '嘉宾'
      }else if(val === 'author' ){
-       this.actionTitle = '制作人信息'
+       this.actionTitle = '制作人'
 
      }else if(val === 'remark' ){
        this.actionTitle = '备注'
 
      }else if(val === 'emcee' ){
-       this.actionTitle = '主持人信息'
+       this.actionTitle = '主持人'
 
      }
       this.showInfomation = true
@@ -737,7 +750,7 @@ this.audio.oncanplay =function(){
   border-radius: 50%;
   width: 8px;
   height: 8px;
-  background: #101010;
+  background: #666;
 }
 
 .jiemu_warp {
@@ -852,10 +865,14 @@ this.audio.oncanplay =function(){
   color: #333;
   
 }
+.creattime_box{
+  display: flex;
+  align-items: flex-end;
+}
 .creattime {
   font-size: 8px;
+  margin-top: 1.5px;
   display: inline-block;
- margin-top: 2px;
   color: rgb(107, 107, 107);
 }
 .com_content {
@@ -895,14 +912,16 @@ background: #666;
 }
 
 /* 音频相关 */
+
+/* 音频相关 */
 .audiobox {
-  padding:8px 18px 10px;
-    background: #EDEDED;
-     
+  padding:6px 18px 14px;
   width: 100%;
   box-sizing: border-box;
   position: fixed;
+  background: #EDEDED;
   bottom: 0;
+  /* background: #eee; */
 }
 /* top */
 .audio_top {
@@ -932,7 +951,7 @@ background: #666;
 }
 /* center */
 .audio_center {
-  margin: 15px 0 15px;
+  margin: 15px 0 13px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -950,14 +969,18 @@ background: #666;
   color: #333;
 }
 .cen_jindu {
+  position: relative;
   flex: 1;
+  /* height: 2px; */
 }
 .cen_icon {
+  /* position: absolute; */
+  top: -6px;
+  border-radius: 50%;
   width: 13px;
   height: 13px;
 }
 .audio_bottom {
-
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1011,7 +1034,7 @@ background: #666;
 }
 .action_text{
   text-align: left;
-  max-height: 430px;
+  max-height: 330px;
   overflow-y: auto;
   color: #333333;
   font-size: 14px;

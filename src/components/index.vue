@@ -23,18 +23,18 @@
         
    <div class="footer_box">
          <div class="foot_view_warp">
-           <div @click="gobuy" :style="{'background':colorinfo.one}" class="foot_view"> 
+           <div @click="gobuy" :style="{'background':indexTop.yesShopButtonColor}" class="foot_view"> 
               <img src="static/img/havebuy.png" alt="">
               </div>
-          <div @click="gonobuy" :style="{'background':colorinfo.two}" class="foot_view">
+          <div @click="gonobuy" :style="{'background':indexTop.notShopButtonColor}" class="foot_view">
               <img src="static/img/h_nobuy.png" alt="">
             
              </div>
-          <div @click="golanmu" :style="{'background':colorinfo.three}" class="foot_view">
+          <div @click="golanmu" :style="{'background':indexTop.columnButtonColor}" class="foot_view">
               <img src="static/img/h_lanmu.png" alt="">
             
              </div>
-          <div @click="gotingzhong" :style="{'background':colorinfo.four}" class="foot_view">
+          <div @click="gotingzhong" :style="{'background':indexTop.audienceButtonColor}" class="foot_view">
               <img src="static/img/h_tingzhong.png" alt="">
             
              </div>
@@ -185,12 +185,13 @@ export default {
 
 .footer {
   position: fixed;
-  bottom: 6.4vh;
+  bottom: 5.8vh;
   left: 38.3vw;
   width: 20px;
-  text-align: center;
-  line-height: 20px;
-  height: 20px;
+ height: 20px;
+  display: flex;
+  justify-content:center;;
+  align-items: center;
   background: orangered;
   color: #fff;
   font-size: 8px;
@@ -204,7 +205,7 @@ export default {
 }
 .foot_view_warp {
   display: flex;
-    height: 9.5vh;
+    height: 9.3vh;
     position: fixed;
     bottom: 0;
 
@@ -216,7 +217,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 23vw;
+  width: 23.5vw;
 }
 .foot_view img{
   width: 10vw;
