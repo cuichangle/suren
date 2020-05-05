@@ -9,7 +9,8 @@ let sendurl = 'http://api.surenguangbo.com:8088/suren/' //测试地址
             axios.post(sendurl+url,data,{
                 headers: {
                     'userAccess': userAccess,
-                    'content-type': 'application/json'
+                    'content-type': 'application/json',
+                    'referer':'http://surenguangbo.com'
                   },
             }).then(res=>{
                     if(res.data.code == 200){

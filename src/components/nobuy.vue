@@ -100,11 +100,11 @@
          <img v-if="playstatus == 2" @click="changestatus" src="static/img/suiji.png" class="bo_icon1" alt="">
          <img v-if="playstatus == 3" @click="changestatus" src="static/img/danqu.png" class="bo_icon1" alt="">
          <div class="icon_box">
-            <img @click="clickBefore" src="static/img/backoff.png" class="bo_icon2" alt="">
+            <img @click="clickBefore" src="static/img/backoff.jpg" class="bo_icon2" alt="">
             <img v-if="audioPlayShow" @click="playAudio" src="static/img/playbtn.png" class="bo_icon3" alt="">
             <img v-else @click="pauseAudio" src="static/img/stop.png" class="bo_icon3" alt="">
 
-            <img  @click="clickAfter" src="static/img/forward.png" class="bo_icon4" alt="">
+            <img  @click="clickAfter" src="static/img/forward.jpg" class="bo_icon4" alt="">
          </div>
          <img  @click="clickme(5)" src="static/img/wechat.png" class="bo_icon5" alt="">
        </div>
@@ -307,7 +307,7 @@ trialurl:'',
         duration: 2000
       });
       time = time.join(',')
-     
+     let that = this
       let openid = this.$store.state.openid;
      
 axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
@@ -317,8 +317,8 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
     }
   })
   .then(function (res) {
-    this.$toast.clear()
-    this.wxpaymoney(res.response)
+    that.$toast.clear()
+    that.wxpaymoney(res.data.response)
    
   })
   .catch(function (error) {
@@ -357,15 +357,16 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
              return decodeURIComponent((new RegExp('[?|&]' + key + '=' + '([^&;]+?)(&|#|;|$)').exec(url) || [, ""])[1].replace(/\+/g, '%20')) || null
     
     },
-    wxpaymoney(url) {
-      var appId = this.getURLParams("appid",url);
+    wxpaymoney(data) {
+      console.log(data)
+      var appId = data.appid;
 
-      var timeStamp = this.getURLParams("timeStamp",url);
-      var nonceStr = this.getURLParams("nonceStr",url);
-      var packageValue = this.getURLParams("packageValue",url);
-      var paySign = this.getURLParams("paySign",url);
-      var money = this.getURLParams("money",url);
-     
+      var timeStamp = data.timeStamp;
+      var nonceStr = data.nonceStr;
+      var packageValue = data.packageValue;
+      var paySign = data.paySign;
+      var money = data.money;
+     let that = this
       wx.config({
         debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
         appId: appId, // 必填，公众号的唯一标识
@@ -382,8 +383,8 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
         signType: "MD5", // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
         paySign: paySign, // 支付签名
         success: function(res) {
-          this.$toast("支付成功");
-           this.$router.push({path:'/buy',query:{type:1}})
+          that.$toast("支付成功");
+           that.$router.push({path:'/buy',query:{type:1}})
           // 支付成功后的回调函数
         }
       });
@@ -546,6 +547,9 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
       this.money = Number(money) || 30
     }
     this.getYearInfo();
+    if(window.location.href.indexOf('?#')<0){
+      window.location.href = window.location.href.replace('#','?#')
+    }
   }
 };
 </script>
@@ -674,7 +678,7 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
 
 .jiemu_list {
   margin-top: 20px;
-  white-space: nowrap;
+  white-space: wrap;
   display: flex;
 }
 
@@ -682,7 +686,8 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
   font-size: 12px;
   color: #666;
   flex: 1;
-  overflow-x: auto;
+  /* overflow-x: auto; */
+  flex-wrap: wrap;
 }
 
 .nowplay {

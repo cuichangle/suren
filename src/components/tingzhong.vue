@@ -13,7 +13,7 @@
 export default {
   data() {
     return {
-      type:0,
+      type:1,
       infoHtml:'',
     };
   },

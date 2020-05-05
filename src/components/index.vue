@@ -1,7 +1,7 @@
 <template>
   <div  id="homepage" class="page">
     <div :style="note" class="page_top">
-
+    
     <div class="content">
        <div class="title">{{indexTop.radioTitle}}</div>
        <div class="cost">
@@ -45,7 +45,6 @@
 
      </div>
   
-
    </div>
   </div>
 </template>
