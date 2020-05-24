@@ -1,6 +1,6 @@
 <template>
   <div @click="allclose" class="page">
-  <div v-wechat-title='$route.meta.title'></div>
+  <div v-wechat-title="title"></div>
     
     <!-- 顶部 -->
     <div class="main">
@@ -100,11 +100,11 @@
          <img v-if="playstatus == 2" @click="changestatus" src="static/img/suiji.png" class="bo_icon1" alt="">
          <img v-if="playstatus == 3" @click="changestatus" src="static/img/danqu.png" class="bo_icon1" alt="">
          <div class="icon_box">
-            <img @click="clickBefore" src="static/img/backoff.jpg" class="bo_icon2" alt="">
+            <img @click="clickBefore" src="static/img/backoff.png" class="bo_icon2" alt="">
             <img v-if="audioPlayShow" @click="playAudio" src="static/img/playbtn.png" class="bo_icon3" alt="">
             <img v-else @click="pauseAudio" src="static/img/stop.png" class="bo_icon3" alt="">
 
-            <img  @click="clickAfter" src="static/img/forward.jpg" class="bo_icon4" alt="">
+            <img  @click="clickAfter" src="static/img/forward.png" class="bo_icon4" alt="">
          </div>
          <img  @click="clickme(5)" src="static/img/wechat.png" class="bo_icon5" alt="">
        </div>
@@ -120,6 +120,7 @@ export default {
   data() {
     return {
       audio: "",
+      title:'您未购买过的',
       audioWidth: -2, //圆圈左边的距离
       alltime: "",
       intsecond: "", //总时长音频秒
@@ -262,9 +263,9 @@ trialurl:'',
     },
     // 手动切换音频
     chonseaudio(i) {
-      if (this.cur == i) {
-        return;
-      }
+      // if (this.cur == i) {
+      //   return;
+      // }
       clearTimeout(this.timerout);
       this.trialurl = this.songarr[i].trialurl
       this.tempmonth = this.monthTime
@@ -291,6 +292,7 @@ trialurl:'',
     },
     // 微信支付
     paymoney() {
+      
       if (this.paynum == 0) {
         this.$toast("请选择年份");
         return;
@@ -358,7 +360,7 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
     
     },
     wxpaymoney(data) {
-      console.log(data)
+
       var appId = data.appid;
 
       var timeStamp = data.timeStamp;
@@ -368,7 +370,7 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
       var money = data.money;
      let that = this
       wx.config({
-        debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+        debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
         appId: appId, // 必填，公众号的唯一标识
         timestamp: timeStamp, // 必填，生成签名的时间戳
         nonceStr: nonceStr, // 必填，生成签名的随机串
@@ -546,10 +548,16 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
     if(money){
       this.money = Number(money) || 30
     }
+         var useragent = navigator.userAgent.toLowerCase();
+if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有标识
+      this.$router.push({path:'/'})
+  }
     this.getYearInfo();
-    if(window.location.href.indexOf('?#')<0){
-      window.location.href = window.location.href.replace('#','?#')
-    }
+
+
+
+   
+  
   }
 };
 </script>
@@ -592,7 +600,8 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
 }
 .heiyear {
   /* background: rgba(0,0,0,.2); */
-  height: 160px;
+width: 100%;
+  height: 35vh;
   z-index: 10;
   opacity: 1;
   transition: all 0.8s ease-in-out;
@@ -652,10 +661,10 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
   flex: 1;
 }
 .list_right {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   text-align: center;
-  line-height: 30px;
+  line-height: 42px;
 }
 .list_right img {
   width: 13px;

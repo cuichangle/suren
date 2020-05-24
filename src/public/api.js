@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-
-let sendurl = 'http://api.surenguangbo.com:8088/suren/' //测试地址
+let sendurl = ' http://api.surenguangbo.com/suren-api/'
+// let sendurl = 'http://api.surenguangbo.com:8088/suren/' //测试地址
 
    const request=function (url,data,flag){
         let userAccess = this.$store.state.openid || ''
@@ -9,8 +9,8 @@ let sendurl = 'http://api.surenguangbo.com:8088/suren/' //测试地址
             axios.post(sendurl+url,data,{
                 headers: {
                     'userAccess': userAccess,
-                    'content-type': 'application/json',
-                    'referer':'http://surenguangbo.com'
+                    'content-type': 'application/json'
+                  
                   },
             }).then(res=>{
                     if(res.data.code == 200){

@@ -1,5 +1,6 @@
 <template>
   <div  id="homepage" class="page">
+     <div v-wechat-title='title'></div>
     <div :style="note" class="page_top">
     
     <div class="content">
@@ -20,8 +21,8 @@
     </div>
    
     </div>
-        
-   <div class="footer_box">
+    
+   <div v-if="wechat"  class="footer_box">
          <div class="foot_view_warp">
            <div @click="gobuy" :style="{'background':indexTop.yesShopButtonColor}" class="foot_view"> 
               <img src="static/img/havebuy.png" alt="">
@@ -39,20 +40,26 @@
             
              </div>
      </div>
-     <div class="footer" v-if="userShopInfo">
+     
+     <div class="footer" v-if="userShopInfo.noShopMonthNum>0">
 
       <div  class="count">{{userShopInfo.noShopMonthNum}}</div>
 
      </div>
   
    </div>
+   <div v-else class="footer_box warning">请在微信客户端打开!!!</div>
   </div>
 </template>
 <script>
+import wx from "weixin-js-sdk";
+
 export default {
   data() {
     return {
       indexTop:{},
+      title:'素人RADIO广播电台',
+      wechat:true,
       userShopInfo:{},
       colorinfo:{
       
@@ -107,9 +114,55 @@ export default {
         this.userShopInfo = res.response.userShopInfo
         localStorage.setItem('money',res.response.priceInfo)
         let img = res.response.indexTop.backgroundImg
-        if(img.length>11){
+        if(img.length>8){
           this.note.backgroundImage="url(" + img + ") "
         }
+      })
+    },
+    getshare(){
+      this.$request('access',{}).then(res=>{
+            console.log(res)
+            wx.config({
+          debug: true,
+          appId: res.response.appId,
+          timestamp: res.response.timeStamp,
+          noceStr: res.response.nonceStr,
+          signature: res.response.sign,
+          jsApiList: ["onMenuShareAppMessage", "onMenuShareTimeline"]
+        });
+    
+          wx.ready(() => {
+        
+            wx.onMenuShareAppMessage({
+              title: "会员收听入口", // 分享标题
+
+              desc: "中国最认真的同志广播电台", // 分享描述
+
+                            link:'http://surenguangbo.com/suren-api' , // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+
+                          imgUrl:'static/img/share.jpg' , // 分享图标
+
+              success: function() {
+
+              },
+
+              cancel: function() {}
+            });
+               wx.onMenuShareTimeline({
+              title: "会员收听入口", // 分享标题
+
+              desc: "中国最认真的同志广播电台", // 分享描述
+
+                            link:'http://surenguangbo.com/suren-api' , // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+
+                          imgUrl:'static/img/share.jpg' , // 分享图标
+            });
+          });
+    
+         
+        
+
+
       })
     }
   
@@ -122,18 +175,30 @@ export default {
     }, {passive: false}) // passive 参数不能省略，用来兼容ios和android
 
     let id = this.getUrlKey('openid')
-	
-    console.log(id,'路径拿到的openid')
+	 
+
+  
 
     if(id){
         localStorage.setItem('openid',id)
+      
+        
         this.$store.commit('changeOpenid',id)
+       
+        // window.location.href = 'http://surenguangbo.com/suren-api/#/'
     }else{
       // window.location.href = 'http://surenguangbo.com/suren';
     }
-    this.getHomeInfo()
- 
+      
+ var useragent = navigator.userAgent.toLowerCase();
+if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有标识
+   this.$toast('请在微信客户端打开')
+   this.wechat = false
 
+
+  }
+  this.getHomeInfo()
+  this.getshare()
   },
   beforeDestroy(){
     //  document.body.removeEventListener('touchmove',function (e) {
@@ -221,5 +286,13 @@ export default {
 .foot_view img{
   width: 10vw;
   height: 10vw;
+}
+.warning{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #f66;
+  font-size: 16px;
+  font-weight: 600;
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
 <div class="page ueditor">
-  <div v-wechat-title='$route.meta.title'></div>
+  <div v-wechat-title='title'></div>
   
 
 <div id="editor" v-html="infoHtml" >
@@ -13,6 +13,7 @@
 export default {
   data() {
     return {
+      title:'全部栏目介绍',
       type:0,
       infoHtml:'',
     };
@@ -32,6 +33,10 @@ export default {
     }
   },
     mounted() {
+           var useragent = navigator.userAgent.toLowerCase();
+if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有标识
+      this.$router.push({path:'/'})
+  }
     this.getHomeInfo()
   },
 };

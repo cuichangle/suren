@@ -1,6 +1,6 @@
 <template>
   <div @click='allclose' class="page">
-  <div v-wechat-title='$route.meta.title'></div>
+  <div v-wechat-title='title'></div>
     <!-- 顶部 -->
     <div class="main">
         <div class="m_top">
@@ -119,10 +119,10 @@
          <img v-if="playstatus == 2" @click="changestatus" src="static/img/suiji.png" class="bo_icon1" alt="">
          <img v-if="playstatus == 3" @click="changestatus" src="static/img/danqu.png" class="bo_icon1" alt="">
          <div class="icon_box">
-            <img @click="clickBefore" src="static/img/backoff.jpg" class="bo_icon2" alt="">
+            <img @click="clickBefore" src="static/img/backoff.png" class="bo_icon2" alt="">
             <img v-if="audioPlayShow" @click="playAudio" src="static/img/playbtn.png" class="bo_icon3" alt="">
             <img v-else @click="pauseAudio" src="static/img/stop.png" class="bo_icon3" alt="">
-            <img  @click="clickAfter" src="static/img/forward.jpg" class="bo_icon4" alt="">
+            <img  @click="clickAfter" src="static/img/forward.png" class="bo_icon4" alt="">
          </div>
          <img src="static/img/wechat.png" @click="clickIpticon" class="bo_icon5" alt="">
        </div>
@@ -148,6 +148,7 @@ export default {
   data() {
     return {
       audio: "",
+      title:'您已购买过的',
       alltime: "",
       intsecond: "", //总时长音频秒
       befort: 15, //快进快退的时间
@@ -346,9 +347,9 @@ that.showInfomation = false
     *手动切换音频
     */
     chonseaudio(i) {
-      if (this.cur == i) {
-        return;
-      }
+      // if (this.cur == i) {
+      //   return;
+      // }
         this.$toast.loading({
         message: "音频加载中...",
         forbidClick: true,
@@ -692,6 +693,10 @@ this.audio.oncanplay =function(){
     if(this.$route.query.type){
       this.gotype = this.$route.query.type
     }
+     var useragent = navigator.userAgent.toLowerCase();
+if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有标识
+      // this.$router.push({path:'/'})
+  }
     this.getalllist();
     
   
@@ -799,7 +804,7 @@ this.audio.oncanplay =function(){
   overflow-y: auto;
 }
 .heiyear {
-  height: 160px;
+  height: 35vh;
   z-index: 10;
   opacity: 1;
   transition: all 0.6s ease-in-out;
