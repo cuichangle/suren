@@ -875,7 +875,6 @@ if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有�
 }
 .creattime {
   font-size: 8px;
-  margin-top: 1.5px;
   display: inline-block;
   color: rgb(107, 107, 107);
 }

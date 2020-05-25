@@ -120,13 +120,16 @@ export default {
       })
     },
     getshare(){
-      this.$request('access',{}).then(res=>{
-            console.log(res)
+      let url = location.href.split("#")[0]
+      
+      this.$request('access',{url:url}).then(res=>{
+            console.log(url,res)
             wx.config({
-          debug: true,
+          debug: false,
+            
           appId: res.response.appId,
           timestamp: res.response.timeStamp,
-          noceStr: res.response.nonceStr,
+          nonceStr: res.response.nonceStr,
           signature: res.response.sign,
           jsApiList: ["onMenuShareAppMessage", "onMenuShareTimeline"]
         });
@@ -138,9 +141,9 @@ export default {
 
               desc: "中国最认真的同志广播电台", // 分享描述
 
-                            link:'http://surenguangbo.com/suren-api' , // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                            link:'http://surenguangbo.com/suren-api/index.html' , // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
 
-                          imgUrl:'static/img/share.jpg' , // 分享图标
+                          imgUrl:'http://surenguangbo.com/suren-api/static/img/share.jpg' , // 分享图标
 
               success: function() {
 
@@ -153,9 +156,9 @@ export default {
 
               desc: "中国最认真的同志广播电台", // 分享描述
 
-                            link:'http://surenguangbo.com/suren-api' , // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                            link:'http://surenguangbo.com/suren-api/index.html' , // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
 
-                          imgUrl:'static/img/share.jpg' , // 分享图标
+                          imgUrl:'http://surenguangbo.com/suren-api/static/img/share.jpg' , // 分享图标
             });
           });
     
