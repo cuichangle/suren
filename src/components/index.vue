@@ -190,13 +190,13 @@ export default {
        
         // window.location.href = 'http://surenguangbo.com/suren-api/#/'
     }else{
-      // window.location.href = 'http://surenguangbo.com/suren';
+      // window.location.href = 'http://surenguangbo.com/suren-api/';
     }
       
  var useragent = navigator.userAgent.toLowerCase();
 if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有标识
    this.$toast('请在微信客户端打开')
-   this.wechat = false
+  //  this.wechat = false
 
 
   }

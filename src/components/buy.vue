@@ -250,7 +250,7 @@ completeurl:'',//音频路径
       let shei = this.hei.clientHeight;
       let allhei = this.hei.scrollHeight;
       let mhei = e.srcElement.scrollTop;
-
+      console.log(shei,allhei,mhei)
       if (shei + mhei >= allhei) {
         if (this.allow) {
           this.pageNum++;
@@ -363,6 +363,8 @@ that.showInfomation = false
         this.jishi = 0;
         this.value = 0;
       }
+      this.allow = true
+      this.page = 1
       let that = this;
       that.completeurl = this.songarr[i].completeurl
              this.tempmonth = this.monthTime
@@ -406,6 +408,11 @@ that.showInfomation = false
   获得评论列表
  */
     getcomment() {
+      this.$toast.loading({
+            message: "评论加载中...",
+        forbidClick: true,
+       
+      })
       let openid = this.$store.state.openid;
       let showId = this.songarr[this.cur].id;
       let data = {
@@ -430,6 +437,7 @@ that.showInfomation = false
             that.hei = hei;
           }
         });
+        this.$toast.clear()
       });
     },
     //  添加评论
@@ -859,6 +867,7 @@ if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有�
   color: #333333;
   white-space: nowrap;
   font-size: 9px;
+  line-height: 12px;
   max-width: 180px;
   overflow-x: auto;
   overflow: hidden;
