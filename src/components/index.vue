@@ -125,7 +125,7 @@ export default {
       this.$request('access',{url:url}).then(res=>{
             console.log(url,res)
             wx.config({
-          debug: false,
+          debug: true,
             
           appId: res.response.appId,
           timestamp: res.response.timeStamp,
@@ -141,7 +141,7 @@ export default {
 
               desc: "中国最认真的同志广播电台", // 分享描述
 
-                            link:'http://surenguangbo.com/suren-api/index.html' , // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                            link:'http://surenguangbo.com/suren-api/wxLogin' , // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
 
                           imgUrl:'http://surenguangbo.com/suren-api/static/img/share.jpg' , // 分享图标
 
@@ -196,7 +196,7 @@ export default {
  var useragent = navigator.userAgent.toLowerCase();
 if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有标识
    this.$toast('请在微信客户端打开')
-   this.wechat = false
+  //  this.wechat = false
 
 
   }

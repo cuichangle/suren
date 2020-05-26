@@ -41,6 +41,7 @@
             <div class="jiemu_title">{{item.title}}</div>
         </div>
        </div>
+    
                <!-- 查看评论 -->
         <div  @scroll="scrollGet($event)" v-if="commentlist.length>0"  class="month_warp animated fadeIn">
            <div class="month_list" v-for="(item,index ) in commentlist" :key="index" >
