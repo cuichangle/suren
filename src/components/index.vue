@@ -190,7 +190,7 @@ export default {
        
         // window.location.href = 'http://surenguangbo.com/suren-api/#/'
     }else{
-      // window.location.href = 'http://surenguangbo.com/suren';
+      // window.location.href = 'http://surenguangbo.com/suren-api/';
     }
       
  var useragent = navigator.userAgent.toLowerCase();

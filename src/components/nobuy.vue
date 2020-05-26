@@ -600,7 +600,7 @@ if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有�
 }
 .heiyear {
   /* background: rgba(0,0,0,.2); */
-width: 100%;
+width: 80%;
   height: 35vh;
   z-index: 10;
   opacity: 1;
