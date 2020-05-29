@@ -43,6 +43,17 @@ export default new Router({
         title:'如何加入听众群'
       }
     },
+
+    {
+      path: '/home',
+      name: 'home',
+      component: ()=>import('@/components/home'),
+     
+    },
+    {
+      path: '*',
+      component: ()=>import('@/components/index')
+    }
  
   
   ]

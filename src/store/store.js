@@ -4,7 +4,7 @@ Vue.use(Vuex)
 const store = new Vuex.Store({
     state:{
         // openid:localStorage.getItem('openid') || 'oUWMrwX2009ZBdhqlKi-rD0OeMSI',
-        openid:localStorage.getItem('openid'),
+        openid:localStorage.getItem('surenid'),
         
         money:'',
       

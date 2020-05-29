@@ -767,7 +767,7 @@ width: 80%;
 }
 .cen_icon {
   /* position: absolute; */
-  top: -6px;
+margin-top: 3px;
   border-radius: 50%;
   width: 13px;
   height: 13px;

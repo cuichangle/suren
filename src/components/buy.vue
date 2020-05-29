@@ -35,7 +35,7 @@
 
 
       <!-- 节目列表 -->
-      <div :class="{'dump':monthTime,'heiyear1':showselectyear||showselectmonth}"  class="jiemu_warp " >
+      <div id="list_scrolltop"  :class="{'dump':monthTime,'heiyear1':showselectyear||showselectmonth}"  class="jiemu_warp " >
           <div @click="chonseaudio(index)" class="jiemu_list" v-for="(item,index ) in songarr" :key="index" >
               <div v-if="cur==index  && tempmonth == monthTime" class="list_left" >正在播放：</div>
             <div class="jiemu_title">{{item.title}}</div>
@@ -44,6 +44,8 @@
     
                <!-- 查看评论 -->
         <div  @scroll="scrollGet($event)" v-if="commentlist.length>0"  class="month_warp animated fadeIn">
+   
+
            <div class="month_list" v-for="(item,index ) in commentlist" :key="index" >
                 <div class="com_top">
                     <img :src="item.photo" class="avatar" alt="">
@@ -251,7 +253,6 @@ completeurl:'',//音频路径
       let shei = this.hei.clientHeight;
       let allhei = this.hei.scrollHeight;
       let mhei = e.srcElement.scrollTop;
-      console.log(shei,allhei,mhei)
       if (shei + mhei >= allhei) {
         if (this.allow) {
           this.pageNum++;
@@ -260,6 +261,13 @@ completeurl:'',//音频路径
           console.log("数据请求完毕");
         }
       }
+    },
+    // 列表滑动
+        scrollGetlist(e) {
+ 
+      let hei = e.srcElement.scrollTop;
+      console.log(hei)
+    
     },
     // 点击具体年份
     changeyear(name, sub) {
@@ -274,6 +282,7 @@ completeurl:'',//音频路径
       this.monthTime = time;
       this.showselectmonth = false;
       this.getJiemuInfo();
+ 
     },
     // 正式播放
  canplaythroughFun(){
@@ -436,6 +445,8 @@ that.showInfomation = false
           if (that.commentlist.length) {
             let hei = document.getElementsByClassName("month_warp")[0];
             that.hei = hei;
+                hei.scrollTop = 0
+      
           }
         });
         this.$toast.clear()
@@ -525,7 +536,15 @@ that.showInfomation = false
         openid: openid,
         monthTime: this.monthTime
       }).then(res => {
+        if(res.response){
         this.songarr = res.response;
+    var dom = document.getElementById("list_scrolltop")
+      dom.scrollTop = 0
+        }else{
+      
+          this.monthTime = this.tempmonth
+        }
+         
       });
     },
     // ios input 框问题
@@ -988,7 +1007,7 @@ background: #666;
 }
 .cen_icon {
   /* position: absolute; */
-  top: -6px;
+  margin-top: 3px;
   border-radius: 50%;
   width: 13px;
   height: 13px;

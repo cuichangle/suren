@@ -16,11 +16,9 @@ let sendurl = ' http://api.surenguangbo.com/suren-api/'
                     if(res.data.code == 200){
                         resolve(res.data)
                       }else{
-                        
+                        resolve(res.data)
                           this.$toast(res.data.errorMessage)
-                          if(res.data.status == 40101){
-                            // this.$router.push({path:'/login'})
-                          }
+                      
       
                 }
               

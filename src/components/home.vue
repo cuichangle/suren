@@ -22,7 +22,7 @@
    
     </div>
     
-   <div v-if="wechat"  class="footer_box">
+   <div  class="footer_box">
          <div class="foot_view_warp">
            <div @click="gobuy" :style="{'background':indexTop.yesShopButtonColor}" class="foot_view"> 
               <img src="static/img/havebuy.png" alt="">
@@ -48,7 +48,6 @@
      </div>
   
    </div>
-   <div v-else class="footer_box warning">请在微信客户端打开!!!</div>
   </div>
 </template>
 <script>
@@ -80,9 +79,7 @@ export default {
   methods: {
   
  
-	getUrlKey (name) {
-			        return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.href) || [, ""])[1].replace(/\+/g, '%20')) || null
-			    },
+
     gobuy(){
       this.$router.push({path:'/buy'})
     },
@@ -99,7 +96,7 @@ export default {
     },
     created(){
       this.$toast.loading({
-  message: '努力加载中...',
+  message: '授权登录中...',
   forbidClick: true,
   duration:1000
 });
@@ -120,92 +117,41 @@ export default {
         }
       })
     },
-    getshare(){
-      let url = location.href.split("#")[0]
-      
-      this.$request('access',{url:url}).then(res=>{
-            console.log(url,res)
-            wx.config({
-          debug: false,
-            
-          appId: res.response.appId,
-          timestamp: res.response.timeStamp,
-          nonceStr: res.response.nonceStr,
-          signature: res.response.sign,
-          jsApiList: ["onMenuShareAppMessage", "onMenuShareTimeline"]
-        });
-    
-          wx.ready(() => {
-        
-            wx.onMenuShareAppMessage({
-              title: "会员收听入口", // 分享标题
-
-              desc: "中国最认真的同志广播电台", // 分享描述
-
-                            link:'http://surenguangbo.com/suren-api/wxLogin' , // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-
-                          imgUrl:'http://surenguangbo.com/suren-api/static/img/share.jpg' , // 分享图标
-
-              success: function() {
-
-              },
-
-              cancel: function() {}
-            });
-               wx.onMenuShareTimeline({
-              title: "会员收听入口", // 分享标题
-
-              desc: "中国最认真的同志广播电台", // 分享描述
-
-                            link:'http://surenguangbo.com/suren-api/wxLogin' , // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-
-                          imgUrl:'http://surenguangbo.com/suren-api/static/img/share.jpg' , // 分享图标
-            });
-          });
-    
+        sendcode() {
+        let that = this
+      var url = window.location.href;
+      var uid = localStorage.getItem("surenid");
+      // 有userid就不请求了
+      if (!uid) {
+        if (url.split("code=").length > 1) {
+          var code = url.split("=")[1].split("&")[0];
+          this.$request(
+            "getOpenIdWebLogin",
+            {
+              code: code
+            },
          
-        
-
-
-      })
+          ).then(res => {
+          
+            localStorage.setItem("surenid", res.response.openid);
+           
+           that.$router.push({ path: "/" });
+          });
+        }
+      }
     }
+
   
   },
   mounted() {
  this.getHomeInfo()
-      var dom = document.getElementById('homepage')
-     dom.addEventListener('touchmove', function (e) {
-        e.preventDefault() // 阻止默认的处理方式(阻止下拉滑动的效果)
-    }, {passive: false}) // passive 参数不能省略，用来兼容ios和android
 
-    let id =   localStorage.getItem('surenid')
-	 
-
-  
-
-
-      
- var useragent = navigator.userAgent.toLowerCase();
-if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有标识
-   this.$toast('请在微信客户端打开')
-   this.wechat = false
-
-
-  }else{
-    if(!id){
-        this.$toast.loading({
-  message: '即将授权...',
-  forbidClick: true,
-  duration:1000
-});
-      	let url = encodeURIComponent('http://surenguangbo.com/suren-api/#/home')
-                
-				window.location.href =
-					`https://open.weixin.qq.com/connect/oauth2/authorize?appid=${this.appid}&redirect_uri=${url}&response_type=code&scope=snsapi_userinfo&#wechat_redirect`
+    if (localStorage.getItem("surenid")) {
+      this.$router.push({ path: "/" });
+    } else {
+      this.sendcode();
     }
-  }
   
-  this.getshare()
   },
   beforeDestroy(){
     //  document.body.removeEventListener('touchmove',function (e) {
@@ -284,7 +230,6 @@ if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有�
   justify-content: space-between;
 }
 .foot_view {
-
   display: flex;
   align-items: center;
   justify-content: center;
