@@ -98,14 +98,13 @@ export default {
       this.$toast.loading({
   message: '授权登录中...',
   forbidClick: true,
-  duration:1000
+  duration:2000
 });
     },
     // 获得首页信息
     getHomeInfo(){
 
-      let openid = this.$store.state.openid
-      console.log(openid,'请求后台的openid')
+      let openid = localStorage.getItem('surenid')
       this.$request('index/info',{openid:openid}).then(res=>{
         this.$toast.clear()
         this.indexTop = res.response.indexTop
@@ -134,8 +133,9 @@ export default {
           ).then(res => {
           
             localStorage.setItem("surenid", res.response.openid);
-           
+           that.$store.commit('changeOpenid',res.response.openid)
            that.$router.push({ path: "/" });
+
           });
         }
       }
@@ -144,7 +144,7 @@ export default {
   
   },
   mounted() {
- this.getHomeInfo()
+    this.getHomeInfo()
 
     if (localStorage.getItem("surenid")) {
       this.$router.push({ path: "/" });

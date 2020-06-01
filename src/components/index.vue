@@ -101,16 +101,16 @@ export default {
       this.$toast.loading({
   message: '努力加载中...',
   forbidClick: true,
-  duration:1000
+  duration:2000
 });
     },
     // 获得首页信息
     getHomeInfo(){
 
-      let openid = this.$store.state.openid
+      let openid = this.$store.state.openid || localStorage.getItem('surenid')
       console.log(openid,'请求后台的openid')
       this.$request('index/info',{openid:openid}).then(res=>{
-        this.$toast.clear()
+     
         this.indexTop = res.response.indexTop
         this.userShopInfo = res.response.userShopInfo
         localStorage.setItem('money',res.response.priceInfo)
@@ -118,6 +118,9 @@ export default {
         if(img.length>8){
           this.note.backgroundImage="url(" + img + ") "
         }
+        setTimeout(()=>{
+          this.$toast.clear()
+        },600)
       })
     },
     getshare(){
@@ -172,13 +175,12 @@ export default {
   
   },
   mounted() {
- this.getHomeInfo()
       var dom = document.getElementById('homepage')
      dom.addEventListener('touchmove', function (e) {
         e.preventDefault() // 阻止默认的处理方式(阻止下拉滑动的效果)
     }, {passive: false}) // passive 参数不能省略，用来兼容ios和android
 
-    let id =   localStorage.getItem('surenid')
+     let id = this.$store.state.openid || localStorage.getItem('surenid')
 	 
 
   
@@ -206,6 +208,8 @@ if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有�
   }
   
   this.getshare()
+ this.getHomeInfo()
+
   },
   beforeDestroy(){
     //  document.body.removeEventListener('touchmove',function (e) {
