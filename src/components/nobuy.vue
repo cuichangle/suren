@@ -550,7 +550,7 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
     }
          var useragent = navigator.userAgent.toLowerCase();
 if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有标识
-      this.$router.push({path:'/'})
+      // this.$router.push({path:'/'})
   }
     this.getYearInfo();
 
