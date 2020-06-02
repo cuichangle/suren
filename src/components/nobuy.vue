@@ -63,7 +63,7 @@
 
     <!-- 音频操作 -->
     <div v-if="showaudio" class="audiobox animated fadeInUp">
-          <audio  @loadeddata ="loadeddataFun"   @canplaythrough='canplaythroughFun' :src="trialurl"  id="audio" @ended="overAudio" >
+          <audio  @loadeddata ="loadeddataFun" @pause="closeaudio"   @canplaythrough='canplaythroughFun' :src="trialurl"  id="audio" @ended="overAudio" >
       <!-- <source
      
         type="audio/mp3"
@@ -115,7 +115,7 @@
 <script>
 import wx from "weixin-js-sdk";
 import axios from 'axios'
-import { Slider } from "vant";
+import { Slider,Dialog } from "vant";
 export default {
   data() {
     return {
@@ -193,6 +193,10 @@ trialurl:'',
   },
 
   methods: {
+    closeaudio(){
+    
+this.pauseAudio()
+    },
        allclose(){
        
       this.showselectmonth = false;
@@ -297,6 +301,17 @@ trialurl:'',
         this.$toast("请选择年份");
         return;
       }
+      var ua = navigator.userAgent.toLowerCase();
+var isWeixin = ua.indexOf('micromessenger') != -1;
+var isAndroid = ua.indexOf('android') != -1;
+var isIos = (ua.indexOf('iphone') != -1) || (ua.indexOf('ipad') != -1);
+
+if ( isAndroid || isIos) {//手机访问
+
+}else{//电脑访问
+this.$toast('请在客户端进行支付')
+return
+}
       let time = [];
       this.monthlist.forEach(v => {
         if (v.flag) {
@@ -550,7 +565,7 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
     }
          var useragent = navigator.userAgent.toLowerCase();
 if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有标识
-      // this.$router.push({path:'/'})
+      this.$router.push({path:'/'})
   }
     this.getYearInfo();
 
@@ -680,6 +695,8 @@ width: 80%;
   overflow-y: auto;
 }
 .dump {
+  padding-bottom: 14px;
+  box-sizing: border-box;
   height: 33.5vh;
   opacity: 1;
   transition: all 0.4s ease-in-out;

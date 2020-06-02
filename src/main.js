@@ -14,6 +14,8 @@ import request from './public/api'
 import store from './store/store'
 import {Icon,Slider,Button,Dialog ,Toast,Swipe, ActionSheet,SwipeItem,Loading,Switch} from 'vant'
 Vue.use(SwipeItem)
+Vue.use(Dialog)
+
 Vue.use(Icon)
 Vue.use(Loading)
 Vue.use(Switch)

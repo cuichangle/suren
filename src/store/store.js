@@ -3,8 +3,8 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 const store = new Vuex.Store({
     state:{
-        openid:localStorage.getItem('surenid') || 'oUWMrwX2009ZBdhqlKi-rD0OeMSI',
-        // openid:localStorage.getItem('surenid'),
+        // openid:localStorage.getItem('surenid') || 'oUWMrwX2009ZBdhqlKi-rD0OeMSI',
+        openid:localStorage.getItem('surenid'),
         
         money:'',
       

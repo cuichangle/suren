@@ -85,7 +85,7 @@
 
     <!-- 音频操作 -->
     <div v-if="showaudio" class="audiobox animated fadeInUp">
-          <audio preload @loadeddata ="loadeddataFun" @watiting  @canplaythrough ='canplaythroughFun' id="audio" @ended="overAudio" >
+          <audio @pause="closeaudio" preload @loadeddata ="loadeddataFun" @watiting  @canplaythrough ='canplaythroughFun' id="audio" @ended="overAudio" >
           <source
           :src="completeurl"
         type="audio/mp3"
@@ -223,6 +223,10 @@ completeurl:'',//音频路径
   },
 
   methods: {
+      closeaudio(){
+    
+this.pauseAudio()
+    },
     allclose(){
       this.showselectmonth = false;
         this.showselectyear = false;
@@ -597,7 +601,6 @@ this.audio.oncanplay =function(){
      * 暂停音频
      */
     pauseAudio() {
-      alert('111111111')
       // 请求次数请求
       clearInterval(this.twointerVal);
       this.audioPlayShow = true;
@@ -725,7 +728,7 @@ this.audio.oncanplay =function(){
     }
      var useragent = navigator.userAgent.toLowerCase();
 if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有标识
-      // this.$router.push({path:'/'})
+      this.$router.push({path:'/'})
   }
     this.getalllist();
     
