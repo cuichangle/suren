@@ -37,7 +37,7 @@
        
       </div>
       <!-- 节目列表 -->
-      <div :class="{'dump':songarr.length>=0}"  class="jiemu_warp" >
+      <div id="list_scrolltop" :class="{'dump':songarr.length>=0}"  class="jiemu_warp" >
           <div @click="chonseaudio(index)" class="jiemu_list" v-for="(item,index ) in songarr" :key="index" >
             <div v-if="cur==index && tempmonth == monthTime" class="list_left" >正在播放：</div>
             <div class="jiemu_title">{{item.title}}</div>
@@ -252,7 +252,16 @@ this.pauseAudio()
         openid: openid,
         monthTime: this.monthTime
       }).then(res => {
+        if(!res.response){
+          this.monthTime = this.tempmonth
+
+        }else{
+            
         this.songarr = res.response;
+          var dom = document.getElementById("list_scrolltop")
+      dom.scrollTop = 0
+
+        }
       });
     },
     // 播放进度

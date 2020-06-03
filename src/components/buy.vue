@@ -35,7 +35,7 @@
 
 
       <!-- 节目列表 -->
-      <div id="list_scrolltop"  :class="{'dump':monthTime,'heiyear1':showselectyear||showselectmonth}"  class="jiemu_warp " >
+      <div id="list_scrolltop"  :class="{'dump':tempmonthTime,'heiyear1':showselectyear||showselectmonth}"  class="jiemu_warp " >
           <div @click="chonseaudio(index)" class="jiemu_list" v-for="(item,index ) in songarr" :key="index" >
               <div v-if="cur==index  && tempmonth == monthTime" class="list_left" >正在播放：</div>
             <div class="jiemu_title">{{item.title}}</div>
@@ -43,7 +43,7 @@
        </div>
     
                <!-- 查看评论 -->
-        <div  @scroll="scrollGet($event)" v-if="commentlist.length>0"  class="month_warp animated fadeIn">
+        <div  @scroll="scrollGet" v-if="commentlist.length>0"  class="month_warp animated fadeIn">
    
 
            <div class="month_list" v-for="(item,index ) in commentlist" :key="index" >
@@ -85,7 +85,7 @@
 
     <!-- 音频操作 -->
     <div v-if="showaudio" class="audiobox animated fadeInUp">
-          <audio @pause="closeaudio" preload @loadeddata ="loadeddataFun" @watiting  @canplaythrough ='canplaythroughFun' id="audio" @ended="overAudio" >
+          <audio @pause="closeaudio" preload @loadeddata ="loadeddataFun"  @canplaythrough ='canplaythroughFun' id="audio" @ended="overAudio" >
           <source
           :src="completeurl"
         type="audio/mp3"
@@ -164,6 +164,7 @@ export default {
       audioPlayShow: true,
       gotype: 0, //首次进入 1购买后进入
       yearName: "",
+      tempmonthTime:'',
       monthName: "",
       showinput: false, //是否显示提示框
       audioInterval: null,
@@ -173,6 +174,8 @@ export default {
       commentlist: [],
       comment: "",
       pageNum: 1,
+      tempname:'',
+      temparr:[],
       pageSize: 10,
       playcount: 0, //播放时间，大于10s 即请求接口
       twointerVal: null, //第二个计时器
@@ -254,13 +257,13 @@ this.pauseAudio()
       }
     },
     scrollGet(e) {
-      let shei = this.hei.clientHeight;
+      let shei =  this.hei.clientHeight;
       let allhei = this.hei.scrollHeight;
-      let mhei = e.srcElement.scrollTop;
+      let mhei =Math.ceil( e.srcElement.scrollTop);
       if (shei + mhei >= allhei) {
         if (this.allow) {
           this.pageNum++;
-          this.getcomment();
+          this.getcomment(true);
         } else {
           console.log("数据请求完毕");
         }
@@ -270,7 +273,6 @@ this.pauseAudio()
         scrollGetlist(e) {
  
       let hei = e.srcElement.scrollTop;
-      console.log(hei)
     
     },
     // 点击具体年份
@@ -282,8 +284,10 @@ this.pauseAudio()
     },
     // 点击月份
     chonsemonth(name, time) {
-      this.monthName = name;
+      // this.monthName = name;
+      this.tempname = name
       this.monthTime = time;
+      this.tempmonthTime = time
       this.showselectmonth = false;
       this.getJiemuInfo();
  
@@ -421,7 +425,7 @@ that.showInfomation = false
     /**
   获得评论列表
  */
-    getcomment() {
+    getcomment(flag) {
       this.$toast.loading({
             message: "评论加载中...",
         forbidClick: true,
@@ -440,7 +444,6 @@ that.showInfomation = false
           this.commentlist = [];
         }
         this.commentlist = this.commentlist.concat(res.response.list);
-        console.log(this.commentlist)
         if (res.response.list.length<this.pageSize) {
           this.allow = false;
         }
@@ -450,7 +453,9 @@ that.showInfomation = false
           if (that.commentlist.length) {
             let hei = document.getElementsByClassName("month_warp")[0];
             that.hei = hei;
+            if(!flag){
                 hei.scrollTop = 0
+            }
       
           }
         });
@@ -477,7 +482,7 @@ that.showInfomation = false
       this.$request("comment/saveShowComment", data).then(res => {
         this.showinput = false;
         this.$toast('评论已提交审核')
-        this.getcomment();
+        // this.getcomment();
       });
     },
     // 显示提示框
@@ -542,15 +547,20 @@ that.showInfomation = false
         monthTime: this.monthTime
       }).then(res => {
         if(res.response){
+          this.monthName = this.tempname
         this.songarr = res.response;
     var dom = document.getElementById("list_scrolltop")
       dom.scrollTop = 0
         }else{
+          if(this.tempmonth){
+
+          }
       
           this.monthTime = this.tempmonth
         }
          
       });
+      console.log(this.songarr)
     },
     // ios input 框问题
     onBlurInput() {
@@ -648,7 +658,6 @@ this.audio.oncanplay =function(){
            
       })
   
-      console.log("当前播放", this.cur);
     },
     // 快退
     clickBefore() {
@@ -711,12 +720,13 @@ this.audio.oncanplay =function(){
       };
       this.$request("show/initYesPayInfo", data).then(res => {
         // this.commentlist = res.response;
-
         this.yearName = res.response.yearInfo.yearName;
         this.monthName = res.response.monthInfo.monthName;
         this.songarr = res.response.showList;
         this.yearId = res.response.yearInfo.yearId;
         this.monthTime = res.response.monthInfo.monthTime;
+        this.tempmonthTime = res.response.monthInfo.monthTime;
+
       });
     },
   
@@ -731,9 +741,21 @@ if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有�
       this.$router.push({path:'/'})
   }
     this.getalllist();
-    
+ let that = this
+
+        //     document.addEventListener("visibilitychange", (e) => { // 兼容ios微信手Q
+        //         if (e.hidden) {  // 网页被挂起
+        //         alert('1111111')
+
+        //            that.pauseAudio()
+        //         } 
+            
+            
+        // });
   
   }
+
+
 };
 </script>
 <style scoped>
