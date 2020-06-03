@@ -171,7 +171,10 @@ trialurl:'',
       if (this.jishi < this.intsecond) {
         temp = this.jishi;
       } else {
-        this.pauseAudio()
+        if(this.intsecond>1){
+          this.pauseAudio()
+        }
+      
 
         temp = this.intsecond;
       }

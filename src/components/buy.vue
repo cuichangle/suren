@@ -217,7 +217,10 @@ completeurl:'',//音频路径
         temp = this.jishi;
       } else {
         temp = this.intsecond;
-        this.pauseAudio()
+        if(this.intsecond>1){
+          this.pauseAudio()
+        }
+      
       }
       let min = parseInt(temp / 60);
       let s = temp % 60 < 10 ? "0" + temp % 60 : temp % 60;
