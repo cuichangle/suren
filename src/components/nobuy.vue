@@ -171,6 +171,8 @@ trialurl:'',
       if (this.jishi < this.intsecond) {
         temp = this.jishi;
       } else {
+        this.pauseAudio()
+
         temp = this.intsecond;
       }
       let min = parseInt(temp / 60);
