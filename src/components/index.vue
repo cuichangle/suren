@@ -108,7 +108,6 @@ export default {
     getHomeInfo(){
 
       let openid = this.$store.state.openid || localStorage.getItem('surenid')
-      console.log(openid,'请求后台的openid')
       this.$request('index/info',{openid:openid}).then(res=>{
      
         this.indexTop = res.response.indexTop

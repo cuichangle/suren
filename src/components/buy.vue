@@ -151,7 +151,7 @@ export default {
   data() {
     return {
       audio: "",
-      title:'您已购买过的',
+      title: "您已购买过的",
       alltime: "",
       intsecond: "", //总时长音频秒
       befort: 15, //快进快退的时间
@@ -164,7 +164,7 @@ export default {
       audioPlayShow: true,
       gotype: 0, //首次进入 1购买后进入
       yearName: "",
-      tempmonthTime:'',
+      tempmonthTime: "",
       monthName: "",
       showinput: false, //是否显示提示框
       audioInterval: null,
@@ -174,25 +174,25 @@ export default {
       commentlist: [],
       comment: "",
       pageNum: 1,
-      tempname:'',
-      temparr:[],
+      tempname: "",
+      temparr: [],
       pageSize: 10,
       playcount: 0, //播放时间，大于10s 即请求接口
       twointerVal: null, //第二个计时器
       hei: "",
-      showInfomation:false,
-      infotext:'',
+      showInfomation: false,
+      infotext: "",
       note: {
         backgroundImage:
           "url(" + require("../../static/img/jindutiao.png") + ") ",
         backgroundRepeat: "no-repeat",
         backgroundSize: "100% 100%"
       },
-tempmonth:'',//当前播放
-tempsongarr:[],
-     
-actionTitle:'',//点击不同类型显示action文字提示切换
-completeurl:'',//音频路径
+      tempmonth: "", //当前播放
+      tempsongarr: [],
+
+      actionTitle: "", //点击不同类型显示action文字提示切换
+      completeurl: "", //音频路径
       year: -1, //年份索引
       showaudio: false, //是否显示音频控件
       showselectyear: false, //是否显示年份下拉框
@@ -217,10 +217,9 @@ completeurl:'',//音频路径
         temp = this.jishi;
       } else {
         temp = this.intsecond;
-        if(this.intsecond>1){
-          this.pauseAudio()
+        if (this.intsecond > 1) {
+          this.overAudio();
         }
-      
       }
       let min = parseInt(temp / 60);
       let s = temp % 60 < 10 ? "0" + temp % 60 : temp % 60;
@@ -230,14 +229,12 @@ completeurl:'',//音频路径
   },
 
   methods: {
-      closeaudio(){
-    
-this.pauseAudio()
+    closeaudio() {
+      this.pauseAudio();
     },
-    allclose(){
+    allclose() {
       this.showselectmonth = false;
-        this.showselectyear = false;
-
+      this.showselectyear = false;
     },
     // 点击下拉框
     clickselect() {
@@ -255,15 +252,15 @@ this.pauseAudio()
         this.$toast("请先选择年份");
       }
     },
-    cancelLen(){
-      if(this.comment.length>200){
-        this.$toast('内容已超过200字')
+    cancelLen() {
+      if (this.comment.length > 200) {
+        this.$toast("内容已超过200字");
       }
     },
     scrollGet(e) {
-      let shei =  this.hei.clientHeight;
+      let shei = this.hei.clientHeight;
       let allhei = this.hei.scrollHeight;
-      let mhei =Math.ceil( e.srcElement.scrollTop);
+      let mhei = Math.ceil(e.srcElement.scrollTop);
       if (shei + mhei >= allhei) {
         if (this.allow) {
           this.pageNum++;
@@ -274,10 +271,8 @@ this.pauseAudio()
       }
     },
     // 列表滑动
-        scrollGetlist(e) {
- 
+    scrollGetlist(e) {
       let hei = e.srcElement.scrollTop;
-    
     },
     // 点击具体年份
     changeyear(name, sub) {
@@ -289,19 +284,18 @@ this.pauseAudio()
     // 点击月份
     chonsemonth(name, time) {
       // this.monthName = name;
-      this.tempname = name
+      this.tempname = name;
       this.monthTime = time;
-      this.tempmonthTime = time
+      this.tempmonthTime = time;
       this.showselectmonth = false;
       this.getJiemuInfo();
- 
     },
     // 正式播放
- canplaythroughFun(){
-   let that = this
-    this.$toast.clear()
-    let intsecond
-              intsecond = parseInt(that.audio.duration);
+    canplaythroughFun() {
+      let that = this;
+      this.$toast.clear();
+      let intsecond;
+      intsecond = parseInt(that.audio.duration);
       that.intsecond = intsecond;
       let min = parseInt(intsecond / 60);
       let second = intsecond % 60 < 10 ? "0" + intsecond % 60 : intsecond % 60;
@@ -312,47 +306,43 @@ this.pauseAudio()
         that.jishi++;
         that.value = that.value + Number(step);
       }, 1000);
- } ,
- loadeddataFun(){
+    },
+    loadeddataFun() {
       this.$toast.loading({
         message: "音频缓冲中...",
         forbidClick: true,
         duration: 6000
       });
- },
-    //是否点赞
-    changeLike(id,index) {
-      if( this.commentlist[index].isPraose){
-          this.commentlist[index].praiseNum --
-          this.goodlike('comment/cancelCommentPraise',id)
-      }else{
-          this.commentlist[index].praiseNum ++
-          this.goodlike('comment/saveCommentPraise',id)
-
-      }
-      this.commentlist[index].isPraose = !this.commentlist[index].isPraose
-      
     },
-    goodlike(url,id){
-      let data = {
-        openid:this.$store.state.openid,
-        commentId:id
+    //是否点赞
+    changeLike(id, index) {
+      if (this.commentlist[index].isPraose) {
+        this.commentlist[index].praiseNum--;
+        this.goodlike("comment/cancelCommentPraise", id);
+      } else {
+        this.commentlist[index].praiseNum++;
+        this.goodlike("comment/saveCommentPraise", id);
       }
-         this.$request(url, data).then(res => {
-        
-      });
+      this.commentlist[index].isPraose = !this.commentlist[index].isPraose;
+    },
+    goodlike(url, id) {
+      let data = {
+        openid: this.$store.state.openid,
+        commentId: id
+      };
+      this.$request(url, data).then(res => {});
     },
     // 复制文字
-    copyText(){
-      let that = this
-　let clipboardObj = new this.clipboard(".fuzhi");
-　　　　　　　　clipboardObj .on('success', function () {
-that.showInfomation = false
-　　　　　　　　　　that.$toast("复制成功")
-　　　　　　　　});
-　　　　　　　　clipboardObj .on('error', function () {
-　　　　　　　　　　that.$toast("复制失败")
-　　　　　　　　});
+    copyText() {
+      let that = this;
+      let clipboardObj = new this.clipboard(".fuzhi");
+      clipboardObj.on("success", function() {
+        that.showInfomation = false;
+        that.$toast("复制成功");
+      });
+      clipboardObj.on("error", function() {
+        that.$toast("复制失败");
+      });
     },
     // 播放进度
     changevalue(v) {
@@ -361,9 +351,11 @@ that.showInfomation = false
     },
     // 拖动结束
     playaudioagain() {
- 
+  
       this.audio.currentTime = this.jishi;
+      setTimeout(()=>{
       this.playAudio();
+      },200)
     },
     /*
     *手动切换音频
@@ -372,33 +364,31 @@ that.showInfomation = false
       // if (this.cur == i) {
       //   return;
       // }
-        this.$toast.loading({
+      this.$toast.loading({
         message: "音频加载中...",
         forbidClick: true,
         duration: 6000
       });
       this.cur = i;
-      this.pageNum =1 
+      this.pageNum = 1;
       this.showaudio = true;
       if (this.audio) {
         this.pauseAudio();
         this.jishi = 0;
         this.value = 0;
       }
-      this.allow = true
-      this.page = 1
+      this.allow = true;
+      this.page = 1;
       let that = this;
-      that.completeurl = this.songarr[i].completeurl
-             this.tempmonth = this.monthTime
-      this.tempsongarr = this.songarr
+      that.completeurl = this.songarr[i].completeurl;
+      this.tempmonth = this.monthTime;
+      this.tempsongarr = this.songarr;
 
       this.$nextTick(() => {
-        
-           that.playcount=0
-           that.playAudio(1);
+        that.playcount = 0;
+        that.playAudio(1);
       });
 
-    
       this.getcomment();
     },
     //  定时器处理函数
@@ -431,10 +421,9 @@ that.showInfomation = false
  */
     getcomment(flag) {
       this.$toast.loading({
-            message: "评论加载中...",
-        forbidClick: true,
-       
-      })
+        message: "评论加载中...",
+        forbidClick: true
+      });
       let openid = this.$store.state.openid;
       let showId = this.songarr[this.cur].id;
       let data = {
@@ -448,7 +437,7 @@ that.showInfomation = false
           this.commentlist = [];
         }
         this.commentlist = this.commentlist.concat(res.response.list);
-        if (res.response.list.length<this.pageSize) {
+        if (res.response.list.length < this.pageSize) {
           this.allow = false;
         }
 
@@ -457,26 +446,25 @@ that.showInfomation = false
           if (that.commentlist.length) {
             let hei = document.getElementsByClassName("month_warp")[0];
             that.hei = hei;
-            if(!flag){
-                hei.scrollTop = 0
+            if (!flag) {
+              hei.scrollTop = 0;
             }
-      
           }
         });
-        this.$toast.clear()
+        this.$toast.clear();
       });
     },
     //  添加评论
     addcomment() {
       let openid = this.$store.state.openid;
       let showId = this.songarr[this.cur].id;
-      if(!this.comment){
-        this.$toast('请输入评论内容')
-        return
+      if (!this.comment) {
+        this.$toast("请输入评论内容");
+        return;
       }
-        if(this.comment.length>200){
-        this.$toast('评论内容超过200字限制')
-        return
+      if (this.comment.length > 200) {
+        this.$toast("评论内容超过200字限制");
+        return;
       }
       let data = {
         openid,
@@ -485,19 +473,18 @@ that.showInfomation = false
       };
       this.$request("comment/saveShowComment", data).then(res => {
         this.showinput = false;
-        this.$toast('评论已提交审核')
+        this.$toast("评论已提交审核");
         // this.getcomment();
       });
     },
     // 显示提示框
     clickIpticon() {
       this.showinput = true;
-      this.comment = ''
-      this.$nextTick(()=>{
- let int = document.getElementById('input')
-    int.focus()
-      })
-   
+      this.comment = "";
+      this.$nextTick(() => {
+        let int = document.getElementById("input");
+        int.focus();
+      });
     },
     /**
      * 切换播放状态
@@ -550,21 +537,16 @@ that.showInfomation = false
         openid: openid,
         monthTime: this.monthTime
       }).then(res => {
-        if(res.response){
-          this.monthName = this.tempname
-        this.songarr = res.response;
-    var dom = document.getElementById("list_scrolltop")
-      dom.scrollTop = 0
-        }else{
-          if(this.tempmonth){
-
-          }
-      
-          this.monthTime = this.tempmonth
+        if (res.response) {
+          this.monthName = this.tempname;
+          this.songarr = res.response;
+          var dom = document.getElementById("list_scrolltop");
+          dom.scrollTop = 0;
+        } else {
+          this.monthTime = this.tempmonth;
         }
-         
       });
-      console.log(this.songarr)
+      console.log(this.songarr);
     },
     // ios input 框问题
     onBlurInput() {
@@ -576,40 +558,32 @@ that.showInfomation = false
     playAudio(load) {
       this.audioPlayShow = false;
       this.audio = document.getElementById("audio");
-      
-        let intsecond
-        let that = this
-        if(load ==1){
-          that.audio.load()
-this.audio.oncanplay =function(){
+
+      let intsecond;
+      let that = this;
+      if (load == 1) {
+        that.audio.load();
+        this.audio.oncanplay = function() {
+          that.audio.play();
+
+          that.addcount(this.playcount);
+        };
+      } else {
         that.audio.play();
-  
-      that.addcount(this.playcount);
-    
-        }
-
-
-        }else{
-        that.audio.play();
-       intsecond = parseInt(that.audio.duration);
-      that.intsecond = intsecond;
-      let min = parseInt(intsecond / 60);
-      let second = intsecond % 60 < 10 ? "0" + intsecond % 60 : intsecond % 60;
-      that.alltime = min + ":" + second;
-      let step = Number(100 / intsecond).toFixed(3);
-      clearInterval(that.audioInterval);
-      that.audioInterval = setInterval(() => {
-        that.jishi++;
-        that.value = that.value + Number(step);
-      }, 1000);
-      that.addcount(this.playcount);
-     
-        }
-          
-        
-      
-  
-
+        intsecond = parseInt(that.audio.duration);
+        that.intsecond = intsecond;
+        let min = parseInt(intsecond / 60);
+        let second =
+          intsecond % 60 < 10 ? "0" + intsecond % 60 : intsecond % 60;
+        that.alltime = min + ":" + second;
+        let step = Number(100 / intsecond).toFixed(3);
+        clearInterval(that.audioInterval);
+        that.audioInterval = setInterval(() => {
+          that.jishi++;
+          that.value = that.value + Number(step);
+        }, 1000);
+        that.addcount(this.playcount);
+      }
     },
     /**
      * 暂停音频
@@ -639,7 +613,6 @@ this.audio.oncanplay =function(){
         forbidClick: true,
         duration: 6000
       });
-    
 
       if (this.playstatus == 1) {
         // 顺序播放
@@ -655,13 +628,16 @@ this.audio.oncanplay =function(){
       // 单曲循环
       this.jishi = 0;
       this.value = 0;
-      this.completeurl =  this.tempsongarr[this.cur].completeurl
-  
-      this.$nextTick(()=>{
-           this.playAudio(1);
-           
+      this.pageNum = 1;
+      this.completeurl = this.tempsongarr[this.cur].completeurl;
+
+     setTimeout(() => {
+         this.$nextTick(()=>{
+        this.playAudio(1);
+
       })
-  
+      }, 800);
+      this.getcomment();
     },
     // 快退
     clickBefore() {
@@ -672,7 +648,8 @@ this.audio.oncanplay =function(){
       if (this.jishi > this.befort) {
         this.jishi = this.jishi - this.befort;
         this.audio.currentTime = this.jishi;
-        
+        this.audioPlayShow = false
+
         this.value = this.value - this.befort * Number(nowvalue);
       } else {
         this.jishi = 0;
@@ -687,27 +664,24 @@ this.audio.oncanplay =function(){
       }
       let nowvalue = (100 / this.intsecond).toFixed(3);
       if (this.jishi + this.aftert < this.intsecond) {
+        this.audioPlayShow = false
         this.jishi = this.jishi + this.aftert;
         this.audio.currentTime = this.jishi;
         this.value = this.value + Number(this.aftert * nowvalue);
       }
     },
     clickme(val) {
-     if(val ==='honoredguest'){
-       this.actionTitle = '嘉宾'
-     }else if(val === 'author' ){
-       this.actionTitle = '制作人'
-
-     }else if(val === 'remark' ){
-       this.actionTitle = '备注'
-
-     }else if(val === 'emcee' ){
-       this.actionTitle = '主持人'
-
-     }
-      this.showInfomation = true
-      this.infotext = this.songarr[this.cur][val]
-
+      if (val === "honoredguest") {
+        this.actionTitle = "嘉宾";
+      } else if (val === "author") {
+        this.actionTitle = "制作人";
+      } else if (val === "remark") {
+        this.actionTitle = "备注";
+      } else if (val === "emcee") {
+        this.actionTitle = "主持人";
+      }
+      this.showInfomation = true;
+      this.infotext = this.songarr[this.cur][val];
     },
     //  获得节目信息
     getalllist() {
@@ -730,36 +704,22 @@ this.audio.oncanplay =function(){
         this.yearId = res.response.yearInfo.yearId;
         this.monthTime = res.response.monthInfo.monthTime;
         this.tempmonthTime = res.response.monthInfo.monthTime;
-
       });
-    },
-  
+    }
   },
   mounted() {
     // this.getYearInfo()
-    if(this.$route.query.type){
-      this.gotype = this.$route.query.type
+    if (this.$route.query.type) {
+      this.gotype = this.$route.query.type;
     }
-     var useragent = navigator.userAgent.toLowerCase();
-if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有标识
+    var useragent = navigator.userAgent.toLowerCase();
+    if (useragent.indexOf("micromessenger") === -1) {
+      // micromessenger微信独有标识
       this.$router.push({path:'/'})
-  }
+    }
     this.getalllist();
- let that = this
 
-        //     document.addEventListener("visibilitychange", (e) => { // 兼容ios微信手Q
-        //         if (e.hidden) {  // 网页被挂起
-        //         alert('1111111')
-
-        //            that.pauseAudio()
-        //         } 
-            
-            
-        // });
-  
   }
-
-
 };
 </script>
 <style scoped>
@@ -829,6 +789,7 @@ if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有�
 .dump {
   height: 33.5vh;
   opacity: 1;
+  padding-bottom: 10px;
   transition: all 0.4s ease-in-out;
 }
 .heiyear1 {
@@ -877,7 +838,8 @@ if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有�
 /* 评论相关 */
 .month_warp {
   transition: all 0.3s ease-in-out;
-
+  padding-bottom: 24px;
+  box-sizing: border-box;
   margin-top: 4px;
   height: 37.4vh;
   overflow-y: auto;
@@ -896,7 +858,7 @@ if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有�
   opacity: 0.6;
   margin-left: auto;
 }
-.dianzan{
+.dianzan {
   font-size: 12px;
   display: inline-block;
   margin-left: 3px;
@@ -924,12 +886,11 @@ if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有�
   overflow: hidden;
   margin-right: 9px;
 }
-.grade{
+.grade {
   font-size: 14px;
   color: #333;
-  
 }
-.creattime_box{
+.creattime_box {
   display: flex;
   align-items: flex-end;
 }
@@ -951,22 +912,22 @@ if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有�
 }
 .action_content input {
   font-size: 12px;
-  
+
   border: 0;
   width: 84%;
   border: 1px solid #666;
   padding: 8px 8px;
   border-radius: 6px;
 }
-.action_content1{
-padding-bottom:20px;
+.action_content1 {
+  padding-bottom: 20px;
 }
 .submit {
   width: 55%;
 
   margin: 20px auto;
   height: 30px;
-background: #666;
+  background: #666;
   color: #fff;
   text-align: center;
   line-height: 30px;
@@ -978,11 +939,11 @@ background: #666;
 
 /* 音频相关 */
 .audiobox {
-  padding:6px 18px 14px;
+  padding: 6px 18px 14px;
   width: 100%;
   box-sizing: border-box;
   position: fixed;
-  background: #EDEDED;
+  background: #ededed;
   bottom: 0;
   /* background: #eee; */
 }
@@ -1087,7 +1048,7 @@ background: #666;
   color: #959595;
   text-align: center;
 }
-.fuzhi{
+.fuzhi {
   padding: 3px 6px;
   display: inline-block;
   font-size: 12px;
@@ -1095,12 +1056,11 @@ background: #666;
   border: 1px solid #666;
   margin-top: 14px;
 }
-.action_text{
+.action_text {
   text-align: left;
   max-height: 330px;
   overflow-y: auto;
   color: #333333;
   font-size: 14px;
-
 }
 </style>

@@ -172,7 +172,7 @@ trialurl:'',
         temp = this.jishi;
       } else {
         if(this.intsecond>1){
-          this.pauseAudio()
+          this.overAudio()
         }
       
 
@@ -277,7 +277,9 @@ this.pauseAudio()
     // 拖动结束
     playaudioagain() {
       this.audio.currentTime = this.jishi;
+         setTimeout(()=>{
       this.playAudio();
+      },180)
     },
     // 手动切换音频
     chonseaudio(i) {
@@ -503,6 +505,7 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
     overAudio() {
       // 音频播放完成之后改变cur,监听cur改变那么开始播放时间变成00，关闭计时器此并重新开始计时器
       this.audioIsOver = true;
+  
       this.pauseAudio();
       let len = this.songarr.length - 1;
       let mathnum = Math.floor(Math.random() * len);
@@ -527,10 +530,13 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
       // 单曲循环
       this.jishi = 0;
       this.value = 0;
-      this.$nextTick(()=>{
+      setTimeout(() => {
+         this.$nextTick(()=>{
         this.playAudio(1);
 
       })
+      }, 800);
+     
    
     },
     // 快退
@@ -544,6 +550,8 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
         this.audio.currentTime = this.jishi;
         
         this.value = this.value - this.befort * Number(nowvalue);
+        this.audioPlayShow = false
+
       } else {
         this.jishi = 0;
         this.audio.currentTime = this.jishi;
@@ -557,6 +565,8 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
       }
       let nowvalue = (100 / this.intsecond).toFixed(3);
       if (this.jishi + this.aftert < this.intsecond) {
+        this.audioPlayShow = false
+
         this.jishi = this.jishi + this.aftert;
         this.audio.currentTime = this.jishi;
         this.value = this.value + Number(this.aftert * nowvalue);
@@ -596,6 +606,7 @@ if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有�
 .main {
   position: relative;
   padding: 13px 18px;
+  padding-bottom: 0;
 }
 .main .m_top {
   display: flex;
@@ -709,7 +720,7 @@ width: 80%;
   overflow-y: auto;
 }
 .dump {
-  padding-bottom: 14px;
+  padding-bottom: 28px;
   box-sizing: border-box;
   height: 33.5vh;
   opacity: 1;
