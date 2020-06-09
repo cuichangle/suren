@@ -50,8 +50,9 @@
                 <div class="com_top">
                     <img :src="item.photo" class="avatar" alt="">
                     <div class="creattime_box">
-                    <div class="nickname">{{item.username}} <span class="grade">{{item.grade}}</span></div>
-                    <div class="creattime">{{item.createTime}}</div>
+                    <span class="nickname">{{item.username}}</span>
+                    <span class="grade">{{item.grade}}</span>
+                    <span class="creattime">{{item.createTime}}</span>
 
                     </div>
                     <van-icon  @click="changeLike(item.id,index)" class="like_icon" :class="{'islike':item.isPraose}"  size="20" name="good-job-o" />
@@ -715,7 +716,7 @@ export default {
     var useragent = navigator.userAgent.toLowerCase();
     if (useragent.indexOf("micromessenger") === -1) {
       // micromessenger微信独有标识
-      this.$router.push({path:'/'})
+      // this.$router.push({path:'/'})
     }
     this.getalllist();
 
@@ -880,19 +881,22 @@ export default {
   color: #333333;
   white-space: nowrap;
   font-size: 9px;
-  line-height: 12px;
   max-width: 180px;
   overflow-x: auto;
   overflow: hidden;
-  margin-right: 9px;
+ 
 }
 .grade {
+  padding: 0;
+  margin: 0 3px;
   font-size: 14px;
   color: #333;
 }
 .creattime_box {
-  display: flex;
-  align-items: flex-end;
+  /* display: flex;
+ align-items: center; */
+   /* align-items: flex-end; */
+  
 }
 .creattime {
   font-size: 8px;
