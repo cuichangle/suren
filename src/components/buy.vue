@@ -56,7 +56,7 @@
 
                     </div>
                     <van-icon  @click="changeLike(item.id,index)" class="like_icon" :class="{'islike':item.isPraose}"  size="20" name="good-job-o" />
-                    <span class="dianzan " :class="{'islike':item.isPraose}">{{item.praiseNum}}点赞</span>
+                    <span class="dianzan " :class="{'islike':item.isPraose}">{{item.praiseNum | filternFun}}点赞</span>
                 </div>
                 <div class="com_content">
                      
@@ -139,7 +139,13 @@
 </van-action-sheet>
 <van-action-sheet v-model="showInfomation" :title="actionTitle">
   <div class="action_content action_content1">
-     <div class="action_text">{{infotext}}</div>
+     <div v-if="typeof(infotext) =='string'" class="action_text">{{infotext}}</div>
+     <div v-else>
+
+     <div v-for="(item,index) in infotext" :key="index" class="action_text">
+        {{item}}
+     </div>
+     </div>
      <!-- <div class="fuzhi"  :data-clipboard-text="infotext" @click="copyText">一键复制</div> -->
   </div>
 </van-action-sheet>
@@ -682,7 +688,12 @@ export default {
         this.actionTitle = "主持人";
       }
       this.showInfomation = true;
-      this.infotext = this.songarr[this.cur][val];
+      let temp 
+     temp =  this.songarr[this.cur][val]
+     if(temp.indexOf('#')>-1){
+       temp = temp.split('#')
+     }
+      this.infotext = temp
     },
     //  获得节目信息
     getalllist() {
@@ -708,6 +719,15 @@ export default {
       });
     }
   },
+  filters:{
+filternFun(v){
+  if(v>10000){
+    return '9999+'
+  }else{
+    return v
+  }
+}
+  },
   mounted() {
     // this.getYearInfo()
     if (this.$route.query.type) {
@@ -716,7 +736,7 @@ export default {
     var useragent = navigator.userAgent.toLowerCase();
     if (useragent.indexOf("micromessenger") === -1) {
       // micromessenger微信独有标识
-      // this.$router.push({path:'/'})
+      this.$router.push({path:'/'})
     }
     this.getalllist();
 

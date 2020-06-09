@@ -187,24 +187,24 @@ export default {
 
       
  var useragent = navigator.userAgent.toLowerCase();
-// if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有标识
-//    this.$toast('请在微信客户端打开')
-//    this.wechat = false
+if (useragent.indexOf('micromessenger') === -1) { // micromessenger微信独有标识
+   this.$toast('请在微信客户端打开')
+   this.wechat = false
 
 
-//   }else{
-//     if(!id){
-//         this.$toast.loading({
-//   message: '即将授权...',
-//   forbidClick: true,
-//   duration:1000
-// });
-//       	let url = encodeURIComponent('http://surenguangbo.com/suren-api/#/home')
+  }else{
+    if(!id){
+        this.$toast.loading({
+  message: '即将授权...',
+  forbidClick: true,
+  duration:1000
+});
+      	let url = encodeURIComponent('http://surenguangbo.com/suren-api/#/home')
                 
-// 				window.location.href =
-// 					`https://open.weixin.qq.com/connect/oauth2/authorize?appid=${this.appid}&redirect_uri=${url}&response_type=code&scope=snsapi_userinfo&#wechat_redirect`
-//     }
-//   }
+				window.location.href =
+					`https://open.weixin.qq.com/connect/oauth2/authorize?appid=${this.appid}&redirect_uri=${url}&response_type=code&scope=snsapi_userinfo&#wechat_redirect`
+    }
+  }
   
   this.getshare()
  this.getHomeInfo()
