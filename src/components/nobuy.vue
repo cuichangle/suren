@@ -83,6 +83,7 @@
    @input="changevalue"
    @change="playaudioagain"
   :style="note"
+  max=99.9
   bar-height=2
  
   active-color="none"
@@ -171,12 +172,13 @@ trialurl:'',
       if (this.jishi < this.intsecond) {
         temp = this.jishi;
       } else {
+        temp = this.intsecond;
+
         if(this.intsecond>1){
           this.overAudio()
         }
       
 
-        temp = this.intsecond;
       }
       let min = parseInt(temp / 60);
       let s = temp % 60 < 10 ? "0" + temp % 60 : temp % 60;
@@ -286,10 +288,14 @@ this.pauseAudio()
       // if (this.cur == i) {
       //   return;
       // }
+      this.$toast.loading({
+        message: "音频加载中...",
+        forbidClick: true,
+        duration: 6000
+      });
+
       clearTimeout(this.timerout);
-      this.trialurl = this.songarr[i].trialurl
-      this.tempmonth = this.monthTime
-      this.tempsongarr = this.songarr
+   
       this.cur = i;
       this.showaudio = true;
       if (this.audio) {
@@ -297,11 +303,9 @@ this.pauseAudio()
         this.jishi = 0;
         this.value = 0;
       }
-            this.$toast.loading({
-        message: "努力加载中...",
-        forbidClick: true,
-        duration: 1000
-      });
+   this.trialurl = this.songarr[i].trialurl
+      this.tempmonth = this.monthTime
+      this.tempsongarr = this.songarr
          this.$nextTick(() => {
  
 
@@ -310,6 +314,7 @@ this.pauseAudio()
       });
       
     },
+
     // 微信支付
     paymoney() {
       
@@ -441,11 +446,12 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
         that.value = that.value + Number(step);
       }, 1000);
  } ,
+  
  loadeddataFun(){
       this.$toast.loading({
         message: "音频缓冲中...",
         forbidClick: true,
-        duration: 30000
+        duration: 6000
       });
  },
     /**
@@ -455,22 +461,16 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
       this.audioPlayShow = false;
       this.audio = document.getElementById("audio");
       let intsecond 
-
       let that = this
       if(load == 1){
       this.audio.load()
  // 切换路径时
               this.audio.oncanplay =function(){
-                
         that.audio.play();
-        
         }
       }else{
-        
-
              that.audio.play();
                    intsecond = parseInt(that.audio.duration);
-
       that.intsecond = intsecond;
       let min = parseInt(intsecond / 60);
       let second = intsecond % 60 < 10 ? "0" + intsecond % 60 : intsecond % 60;
@@ -481,11 +481,10 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
         that.jishi++;
         that.value = that.value + Number(step);
       }, 1000);
-     
          that.$toast.clear()
       }
-      
     },
+
 
     /**
      * 暂停音频
