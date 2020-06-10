@@ -261,6 +261,7 @@ export default {
     },
     cancelLen() {
       if (this.comment.length > 200) {
+    this.comment = this.comment.slice(0,199)
         this.$toast("内容已超过200字");
       }
     },
@@ -721,8 +722,8 @@ export default {
   },
   filters:{
 filternFun(v){
-  if(v>10000){
-    return '9999+'
+  if(v>=1000){
+    return '999+'
   }else{
     return v
   }
