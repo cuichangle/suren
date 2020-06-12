@@ -83,7 +83,7 @@
    @input="changevalue"
    @change="playaudioagain"
   :style="note"
-  max=99.9
+   
   bar-height=2
  
   active-color="none"
@@ -273,8 +273,13 @@ this.pauseAudio()
     },
     // 播放进度
     changevalue(v) {
+       if(v>=99){
+        this.value = 99
+        
+      }
       this.pauseAudio();
-      this.jishi = parseInt(this.intsecond / 100 * v);
+     
+      this.jishi = parseInt(this.intsecond / 100 * this.value);
     },
     // 拖动结束
     playaudioagain() {
@@ -469,8 +474,9 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
         that.audio.play();
         }
       }else{
+      
              that.audio.play();
-                   intsecond = parseInt(that.audio.duration);
+                   intsecond = parseInt(that.audio.duration) || 0;
       that.intsecond = intsecond;
       let min = parseInt(intsecond / 60);
       let second = intsecond % 60 < 10 ? "0" + intsecond % 60 : intsecond % 60;
@@ -513,7 +519,7 @@ axios.get('http://api.surenguangbo.com:8088/suren/wechat/userSaveSub', {
         forbidClick: true,
         duration: 6000
       });
-
+  
       if (this.playstatus == 1) {
         // 顺序播放
         if (this.cur < len) {

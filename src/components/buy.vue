@@ -354,8 +354,12 @@ export default {
     },
     // 播放进度
     changevalue(v) {
+        if(v>=99){
+        this.value = 99
+        
+      }
       this.pauseAudio();
-      this.jishi = parseInt(this.intsecond / 100 * v);
+      this.jishi = parseInt(this.intsecond / 100 * this.value);
     },
     // 拖动结束
     playaudioagain() {
